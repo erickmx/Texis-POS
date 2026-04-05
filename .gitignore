@@ -1,32 +1,80 @@
-# If you prefer the allow list template instead of the deny list, see community template:
-# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
-#
-# Binaries for programs and plugins
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
+# ==========================================
+# Root Monorepo .gitignore
+# ==========================================
 
-# Test binary, built with `go test -c`
-*.test
-
-# Code coverage profiles and other test artifacts
-*.out
-coverage.*
-*.coverprofile
-profile.cov
-
-# Dependency directories (remove the comment below to include it)
-# vendor/
-
-# Go workspace file
-go.work
-go.work.sum
-
-# env file
+# env files
 .env
+.env.*
+!.env.example
 
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# Go (backend/)
+# ==========================================
+backend/*.exe
+backend/*.exe~
+backend/*.dll
+backend/*.so
+backend/*.dylib
+backend/*.test
+backend/*.out
+backend/coverage.*
+backend/*.coverprofile
+backend/profile.cov
+
+# env file
+backend/.env
+
+# ==========================================
+# Node.js / Next.js (ui/)
+# ==========================================
+ui/node_modules/
+ui/.next/
+ui/out/
+ui/.turbo
+ui/next-env.d.ts
+ui/npm-debug.log*
+ui/yarn-debug.log*
+ui/yarn-error.log*
+ui/.yarn-cache/
+
+# ==========================================
+# Tauri (desktop/)
+# ==========================================
+desktop/node_modules/
+desktop/dist/
+desktop/src-tauri/target/
+desktop/src-tauri/gen/
+desktop/npm-debug.log*
+desktop/yarn-debug.log*
+desktop/yarn-error.log*
+
+# Tauri build outputs
+desktop/src-tauri/**/*.app
+desktop/src-tauri/**/*.dmg
+desktop/src-tauri/**/*.AppImage
+desktop/src-tauri/**/*.deb
+desktop/src-tauri/**/*.rpm
+desktop/src-tauri/**/*.msi
+desktop/src-tauri/**/*.exe
+
+# ==========================================
+# TypeScript
+# ==========================================
+*.tsbuildinfo
+
+# ==========================================
+# Testing
+# ==========================================
+coverage/
+.nyc_output/
