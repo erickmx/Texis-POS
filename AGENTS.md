@@ -13,7 +13,6 @@
 ### Backend (Go)
 ```bash
 cd backend
-export PATH=$PATH:/usr/local/go/bin   # Go is at /usr/local/go/bin on this machine
 go mod tidy
 go run cmd/main.go
 ```
@@ -36,7 +35,7 @@ yarn tauri dev    # requires Rust toolchain (rustup)
 ## Key Constraints
 
 - **Go path**: `go` is not in the default PATH. Always prepend `/usr/local/go/bin`.
-- **npm cache**: `/Users/erickmejia/.npm` has permission issues. Prefer `yarn` over `npm`.
+- **npm cache**: `~/.npm` has permission issues. Prefer `yarn` over `npm`.
 - **Next.js 16.2.2**: This is NOT the Next.js in your training data. Read `ui/AGENTS.md` and `node_modules/next/dist/docs/` before writing code. Heed deprecation notices.
 - **Tauri devUrl**: Points to `http://localhost:3000` (the Next.js dev server). The `desktop/` Vite dev server runs on port 1420 but the Tauri config expects the Next.js app for the actual desktop experience.
 - **Rust**: Installed via rustup at `~/.cargo/bin`. Source `. "$HOME/.cargo/env"` before using `cargo`/`tauri`.

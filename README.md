@@ -3,7 +3,7 @@
 Texis stationery store Point of Sale application. A monorepo with:
 
 - **Backend**: Golang with WebSocket support, WhatsApp chatbot (whatsmeow), and Supabase integration
-- **UI**: Next.js 15 + React 19 web application
+- **UI**: Next.js 16.2.2 + React 19 web application
 - **Desktop**: Tauri v2 desktop application
 
 ## Project Structure
@@ -26,7 +26,7 @@ Texis-POS/
 ## Prerequisites
 
 - **Go** 1.26.1+
-- **Node.js** 18+
+- **Node.js** 24.14.1
 - **Yarn** 1.22+
 - **Rust** 1.70+ (for Tauri)
 
@@ -61,6 +61,6 @@ yarn tauri dev
 | Component | Technology |
 |-----------|-----------|
 | Backend | Go, gorilla/websocket, whatsmeow, supabase-go |
-| Web UI | Next.js 15, React 19, Tailwind CSS |
+| Web UI | Next.js 16.2.2, React 19, Tailwind CSS |
 | Desktop | Tauri v2, TypeScript, Vite |
 | Database | PostgreSQL (via Supabase) |
