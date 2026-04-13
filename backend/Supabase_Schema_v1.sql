@@ -11,6 +11,7 @@ CREATE TABLE products (
   stock_level INTEGER DEFAULT 0,
   reorder_point INTEGER DEFAULT 5,
   image_url TEXT,
+  is_deleted BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
