@@ -1,0 +1,24 @@
+{
+    "mcpServers": {
+        "supabase": {
+            "httpUrl": "https://mcp.supabase.com/mcp?project_ref=yhqgkyzunbolqrsrsqfx&features=docs%2Cdatabase%2Cdebugging%2Cdevelopment%2Cbranching%2Cstorage"
+        },
+        "context7": {
+            "httpUrl": "https://mcp.context7.com/mcp",
+            "headers": {
+                "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}",
+                "Accept": "application/json, text/event-stream"
+            }
+        },
+        "chrome-devtools": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "chrome-devtools-mcp@latest"
+            ]
+        }
+    },
+    "experimental": {
+        "enableAgents": true
+    }
+}
