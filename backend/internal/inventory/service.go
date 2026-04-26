@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-
-	"github.com/erickmx/texis-pos/backend/pkg/supabase"
 )
 
 var (
@@ -19,31 +17,20 @@ type StorageService interface {
 }
 
 type Service struct {
+	repo    ProductRepository
 	storage StorageService
 }
 
-func NewService(storage StorageService) *Service {
-	return &Service{storage: storage}
+func NewService(repo ProductRepository, storage StorageService) *Service {
+	return &Service{repo: repo, storage: storage}
 }
 
 func (s *Service) GetAll(ctx context.Context) ([]Product, error) {
-	client := supabase.GetClient()
-	var products []Product
-	err := client.DB.From("products").Select("*").Eq("is_deleted", "false").Execute(&products)
-	return products, err
+	return s.repo.GetAll(ctx)
 }
 
 func (s *Service) GetByID(ctx context.Context, id string) (*Product, error) {
-	client := supabase.GetClient()
-	var products []Product
-	err := client.DB.From("products").Select("*").Eq("id", id).Eq("is_deleted", "false").Execute(&products)
-	if err != nil {
-		return nil, err
-	}
-	if len(products) == 0 {
-		return nil, ErrProductNotFound
-	}
-	return &products[0], nil
+	return s.repo.GetByID(ctx, id)
 }
 
 func (s *Service) Create(ctx context.Context, dto CreateProductDTO) (*Product, error) {
@@ -60,16 +47,7 @@ func (s *Service) Create(ctx context.Context, dto CreateProductDTO) (*Product, e
 		}
 	}
 
-	client := supabase.GetClient()
-	var products []Product
-	err := client.DB.From("products").Insert(dto).Execute(&products)
-	if err != nil {
-		return nil, err
-	}
-	if len(products) == 0 {
-		return nil, fmt.Errorf("failed to create product")
-	}
-	return &products[0], nil
+	return s.repo.Create(ctx, dto)
 }
 
 func (s *Service) Update(ctx context.Context, id string, dto UpdateProductDTO) (*Product, error) {
@@ -85,30 +63,11 @@ func (s *Service) Update(ctx context.Context, id string, dto UpdateProductDTO) (
 		}
 	}
 
-	client := supabase.GetClient()
-	var products []Product
-	err := client.DB.From("products").Update(dto).Eq("id", id).Execute(&products)
-	if err != nil {
-		return nil, err
-	}
-	if len(products) == 0 {
-		return nil, ErrProductNotFound
-	}
-	return &products[0], nil
+	return s.repo.Update(ctx, id, dto)
 }
 
 func (s *Service) Delete(ctx context.Context, id string) error {
-	client := supabase.GetClient()
-	var products []Product
-	// Logic delete
-	err := client.DB.From("products").Update(map[string]interface{}{"is_deleted": true}).Eq("id", id).Execute(&products)
-	if err != nil {
-		return err
-	}
-	if len(products) == 0 {
-		return ErrProductNotFound
-	}
-	return nil
+	return s.repo.Delete(ctx, id)
 }
 
 func extractFilenameFromURL(imageURL string) string {

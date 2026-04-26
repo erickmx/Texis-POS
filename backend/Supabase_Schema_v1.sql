@@ -48,3 +48,45 @@ CREATE TABLE special_requests_details (
   service_fee DECIMAL(10,2) DEFAULT 0, -- Taxable labor
   attachments TEXT[] -- Array of image URLs
 );
+
+-- RLS & SECURITY
+-- Enable RLS on all tables
+ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE special_requests_details ENABLE ROW LEVEL SECURITY;
+
+-- POLICIES
+-- Products: Read for everyone, Write for authenticated (or backend via service_role)
+CREATE POLICY "Products are viewable by everyone" ON products FOR SELECT USING (true);
+CREATE POLICY "Products are insertable by authenticated users" ON products FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+CREATE POLICY "Products are updatable by authenticated users" ON products FOR UPDATE USING (auth.role() = 'authenticated');
+CREATE POLICY "Products are deletable by authenticated users" ON products FOR DELETE USING (auth.role() = 'authenticated');
+
+-- Orders & Details: Restrict to authenticated only (backend)
+CREATE POLICY "Orders are viewable by authenticated users" ON orders FOR SELECT USING (auth.role() = 'authenticated');
+CREATE POLICY "Orders are insertable by authenticated users" ON orders FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+CREATE POLICY "Order items are viewable by authenticated users" ON order_items FOR SELECT USING (auth.role() = 'authenticated');
+CREATE POLICY "Order items are insertable by authenticated users" ON order_items FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+CREATE POLICY "Special requests are viewable by authenticated users" ON special_requests_details FOR SELECT USING (auth.role() = 'authenticated');
+CREATE POLICY "Special requests are insertable by authenticated users" ON special_requests_details FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+-- STORAGE POLICIES
+-- Note: These apply to the 'objects' table in the 'storage' schema
+-- We assume the bucket 'inventory-images' is created.
+-- Allow public read access to the inventory-images bucket
+CREATE POLICY "Public Access"
+ON storage.objects FOR SELECT
+USING ( bucket_id = 'inventory-images' );
+
+-- Allow authenticated users (backend) to upload to the inventory-images bucket
+CREATE POLICY "Authenticated Upload"
+ON storage.objects FOR INSERT
+WITH CHECK ( bucket_id = 'inventory-images' AND auth.role() = 'authenticated' );
+
+-- Allow authenticated users to delete their uploads
+CREATE POLICY "Authenticated Delete"
+ON storage.objects FOR DELETE
+USING ( bucket_id = 'inventory-images' AND auth.role() = 'authenticated' );

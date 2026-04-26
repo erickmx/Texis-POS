@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"github.com/erickmx/texis-pos/backend/internal/auth"
+	"github.com/erickmx/texis-pos/internal/auth"
 	"github.com/gofiber/fiber/v2"
 )
 
