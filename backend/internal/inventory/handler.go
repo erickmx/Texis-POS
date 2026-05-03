@@ -2,7 +2,7 @@ package inventory
 
 import (
 	"github.com/erickmx/texis-pos/internal/auth"
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 type Handler struct {
@@ -26,7 +26,7 @@ func (h *Handler) RegisterRoutes(app *fiber.App) {
 	api.Delete("/:id", auth.IsAdmin(), h.Delete)
 }
 
-func (h *Handler) GetAll(c *fiber.Ctx) error {
+func (h *Handler) GetAll(c fiber.Ctx) error {
 	products, err := h.service.GetAll(c.Context())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
@@ -34,7 +34,7 @@ func (h *Handler) GetAll(c *fiber.Ctx) error {
 	return c.JSON(products)
 }
 
-func (h *Handler) GetByID(c *fiber.Ctx) error {
+func (h *Handler) GetByID(c fiber.Ctx) error {
 	id := c.Params("id")
 	product, err := h.service.GetByID(c.Context(), id)
 	if err != nil {
@@ -46,9 +46,9 @@ func (h *Handler) GetByID(c *fiber.Ctx) error {
 	return c.JSON(product)
 }
 
-func (h *Handler) Create(c *fiber.Ctx) error {
+func (h *Handler) Create(c fiber.Ctx) error {
 	dto := new(CreateProductDTO)
-	if err := c.BodyParser(dto); err != nil {
+	if err := c.Bind().Body(dto); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse body"})
 	}
 
@@ -62,10 +62,10 @@ func (h *Handler) Create(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(product)
 }
 
-func (h *Handler) Update(c *fiber.Ctx) error {
+func (h *Handler) Update(c fiber.Ctx) error {
 	id := c.Params("id")
 	dto := new(UpdateProductDTO)
-	if err := c.BodyParser(dto); err != nil {
+	if err := c.Bind().Body(dto); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse body"})
 	}
 
@@ -82,7 +82,7 @@ func (h *Handler) Update(c *fiber.Ctx) error {
 	return c.JSON(product)
 }
 
-func (h *Handler) Delete(c *fiber.Ctx) error {
+func (h *Handler) Delete(c fiber.Ctx) error {
 	id := c.Params("id")
 	err := h.service.Delete(c.Context(), id)
 	if err != nil {

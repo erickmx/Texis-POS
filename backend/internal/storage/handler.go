@@ -2,7 +2,7 @@ package storage
 
 import (
 	"github.com/erickmx/texis-pos/internal/auth"
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 type Handler struct {
@@ -20,7 +20,7 @@ func (h *Handler) RegisterRoutes(app *fiber.App) {
 	api.Post("/upload", auth.IsAdmin(), h.Upload)
 }
 
-func (h *Handler) Upload(c *fiber.Ctx) error {
+func (h *Handler) Upload(c fiber.Ctx) error {
 	file, err := c.FormFile("image")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "no image provided"})

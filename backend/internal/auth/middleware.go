@@ -1,14 +1,14 @@
 package auth
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 // IsAdmin is a mocked middleware that checks for an admin role.
 // It checks for a simulated 'X-Role' header and validates that it's 'admin'.
 // In a real scenario, this would check a JWT session and a database role.
 func IsAdmin() fiber.Handler {
-	return func(c *fiber.Ctx) error {
+	return func(c fiber.Ctx) error {
 		// Mocked check: Assume 'X-Role' header contains the role
 		role := c.Get("X-Role")
 		if role != "admin" {
