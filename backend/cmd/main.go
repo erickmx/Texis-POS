@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/erickmx/texis-pos/internal/auth"
 	"github.com/erickmx/texis-pos/internal/infrastructure/db"
 	storageInfra "github.com/erickmx/texis-pos/internal/infrastructure/storage"
 	"github.com/erickmx/texis-pos/internal/inventory"
@@ -64,14 +65,28 @@ func main() {
 	storageProvider := storageInfra.NewSupabaseStorageProvider(sbClient)
 
 	// 5. Initialize Services
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		log.Fatal("JWT_SECRET must be set")
+	}
+
+	authSvc := auth.NewService(
+		jwtSecret,
+		os.Getenv("ADMIN_USERNAME"),
+		os.Getenv("ADMIN_PASSWORD"),
+		os.Getenv("SELLER_USERNAME"),
+		os.Getenv("SELLER_PASSWORD"),
+	)
 	storageSvc := storage.NewService(storageProvider)
 	inventorySvc := inventory.NewService(productRepo, storageSvc)
 
 	// 6. Initialize Handlers
-	storageHandler := storage.NewHandler(storageSvc)
-	inventoryHandler := inventory.NewHandler(inventorySvc)
+	authHandler := auth.NewHandler(authSvc)
+	storageHandler := storage.NewHandler(storageSvc, authSvc)
+	inventoryHandler := inventory.NewHandler(inventorySvc, authSvc)
 
 	// 7. Register Routes
+	app.Post("/api/login", authHandler.Login)
 	storageHandler.RegisterRoutes(app)
 	inventoryHandler.RegisterRoutes(app)
 
