@@ -6,11 +6,15 @@ import (
 )
 
 type Handler struct {
-	service *Service
+	service     *Service
+	authService auth.AuthService
 }
 
-func NewHandler(service *Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(service *Service, authService auth.AuthService) *Handler {
+	return &Handler{
+		service:     service,
+		authService: authService,
+	}
 }
 
 func (h *Handler) RegisterRoutes(app *fiber.App) {
@@ -21,9 +25,9 @@ func (h *Handler) RegisterRoutes(app *fiber.App) {
 	api.Get("/:id", h.GetByID)
 
 	// POST, Update, Logic Delete are for admin only
-	api.Post("/", auth.IsAdmin(), h.Create)
-	api.Put("/:id", auth.IsAdmin(), h.Update)
-	api.Delete("/:id", auth.IsAdmin(), h.Delete)
+	api.Post("/", auth.IsAdmin(h.authService), h.Create)
+	api.Put("/:id", auth.IsAdmin(h.authService), h.Update)
+	api.Delete("/:id", auth.IsAdmin(h.authService), h.Delete)
 }
 
 func (h *Handler) GetAll(c fiber.Ctx) error {

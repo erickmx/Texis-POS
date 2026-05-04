@@ -6,18 +6,22 @@ import (
 )
 
 type Handler struct {
-	service *Service
+	service     *Service
+	authService auth.AuthService
 }
 
-func NewHandler(service *Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(service *Service, authService auth.AuthService) *Handler {
+	return &Handler{
+		service:     service,
+		authService: authService,
+	}
 }
 
 func (h *Handler) RegisterRoutes(app *fiber.App) {
 	api := app.Group("/api/storage")
 
 	// Only admin can upload for now
-	api.Post("/upload", auth.IsAdmin(), h.Upload)
+	api.Post("/upload", auth.IsAdmin(h.authService), h.Upload)
 }
 
 func (h *Handler) Upload(c fiber.Ctx) error {
