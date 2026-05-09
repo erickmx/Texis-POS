@@ -59,3 +59,7 @@ yarn tauri dev    # requires Rust toolchain (rustup)
 - Vite serves on port 1420 (strict port, no fallback)
 - Tauri build output: `desktop/dist/`
 - Rust crate: `texis-pos-desktop`, Tauri v2, identifier `com.erickmx.texis-pos`
+
+## Design Reference
+
+Please refer to @DESIGN.md for all UI styling rules..
