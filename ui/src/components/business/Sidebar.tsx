@@ -13,22 +13,28 @@ import {
   BookOpen
 } from 'lucide-react';
 import { Icon } from '../ui/Icon';
+import { useTranslation } from '@/i18n/client';
 
-const navItems = [
-  { name: 'Overview', icon: LayoutDashboard, href: '/overview' },
-  { name: 'Catalog', icon: Package, href: '/inventory' },
-  { name: 'Stock Levels', icon: TrendingUp, href: '/stock' },
-  { name: 'Analytics', icon: BarChart3, href: '/analytics' },
-  { name: 'History', icon: History, href: '/history' },
-];
+interface SidebarProps {
+  lng: string;
+}
 
-const secondaryItems = [
-  { name: 'Help', icon: HelpCircle, href: '/help' },
-  { name: 'Logout', icon: LogOut, href: '/logout' },
-];
-
-export const Sidebar: React.FC = () => {
+export const Sidebar: React.FC<SidebarProps> = ({ lng }) => {
   const pathname = usePathname();
+  const { t } = useTranslation(lng, 'common');
+
+  const navItems = [
+    { name: t('sidebar.overview'), icon: LayoutDashboard, href: `/${lng}/overview` },
+    { name: t('sidebar.catalog'), icon: Package, href: `/${lng}/inventory` },
+    { name: t('sidebar.stock_levels'), icon: TrendingUp, href: `/${lng}/stock` },
+    { name: t('sidebar.analytics'), icon: BarChart3, href: `/${lng}/analytics` },
+    { name: t('sidebar.history'), icon: History, href: `/${lng}/history` },
+  ];
+
+  const secondaryItems = [
+    { name: t('sidebar.help'), icon: HelpCircle, href: `/${lng}/help` },
+    { name: t('sidebar.logout'), icon: LogOut, href: `/${lng}/logout` },
+  ];
 
   return (
     <aside className="w-64 h-full bg-surface border-r border-solid border-outline-variant flex flex-col py-8 px-4">
@@ -39,9 +45,10 @@ export const Sidebar: React.FC = () => {
         </div>
         <div>
           <h1 className="text-primary font-display font-bold text-xl leading-none tracking-tight">Talavera Folio</h1>
-          <p className="text-[10px] tracking-[0.2em] text-on-surface-variant/60 font-bold mt-1">MAIN WAREHOUSE</p>
+          <p className="text-[10px] tracking-[0.2em] text-on-surface-variant/60 font-bold mt-1 uppercase">{t('sidebar.warehouse')}</p>
         </div>
       </div>
+...
 
       {/* Primary Navigation */}
       <nav className="flex-1 flex flex-col gap-2">

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Work_Sans } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
@@ -17,14 +17,21 @@ export const metadata: Metadata = {
   description: "Tactile inventory management for premium stationery.",
 };
 
-export default function RootLayout({
+export async function generateStaticParams() {
+  return [{ lng: 'en' }, { lng: 'es' }];
+}
+
+export default async function RootLayout({
   children,
-}: Readonly<{
+  params,
+}: {
   children: React.ReactNode;
-}>) {
+  params: Promise<{ lng: string }>;
+}) {
+  const { lng } = await params;
   return (
     <html
-      lang="en"
+      lang={lng}
       className={`${plusJakartaSans.variable} ${workSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-on-surface">

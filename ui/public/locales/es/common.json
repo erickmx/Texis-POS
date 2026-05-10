@@ -1,0 +1,49 @@
+{
+  "sidebar": {
+    "warehouse": "ALMACÉN PRINCIPAL",
+    "overview": "Vista General",
+    "catalog": "Catálogo",
+    "stock_levels": "Niveles de Stock",
+    "analytics": "Análisis",
+    "history": "Historial",
+    "help": "Ayuda",
+    "logout": "Cerrar Sesión"
+  },
+  "navbar": {
+    "search_placeholder": "Buscar inventario, SKUs, o pedidos...",
+    "new_product": "Nuevo Producto"
+  },
+  "inventory": {
+    "title": "Catálogo de Productos",
+    "quick_filters": "Filtros Rápidos",
+    "total_items": "TOTAL DE ARTÍCULOS",
+    "low_stock": "STOCK BAJO",
+    "health_summary": {
+      "title": "Resumen de Salud de Inventario",
+      "optimized": "Tus niveles de stock están un <1>{{score}}% optimizados</1>.",
+      "urgent_reorder": "Hay <1>{{count}} artículos</1> que requieren reabastecimiento inmediato para evitar faltantes en los próximos 7 días.",
+      "view_urgent": "VER PEDIDOS URGENTES"
+    },
+    "table": {
+      "product": "Producto",
+      "sku": "SKU",
+      "stock_level": "Nivel de Stock",
+      "buy_price": "Precio Compra",
+      "sale_price": "Precio Venta",
+      "actions": "Acciones",
+      "units": "Unidades",
+      "in_stock": "EN STOCK",
+      "low_stock": "STOCK BAJO",
+      "out_of_stock": "SIN STOCK",
+      "showing": "Mostrando {{start}} a {{end}} de {{total}} productos"
+    },
+    "categories": {
+      "notebooks": "Libretas",
+      "fine_pens": "Plumas Finas",
+      "desk_organizers": "Organizadores",
+      "adhesives": "Adhesivos",
+      "out_of_stock": "Sin Stock",
+      "new_season": "Nueva Temporada"
+    }
+  }
+}

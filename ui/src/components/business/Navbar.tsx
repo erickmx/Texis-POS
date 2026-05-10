@@ -1,9 +1,18 @@
+'use client';
+
 import React from 'react';
 import { Search, Plus, Bell, Settings } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
+import { useTranslation } from '@/i18n/client';
 
-export const Navbar: React.FC = () => {
+interface NavbarProps {
+  lng: string;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({ lng }) => {
+  const { t } = useTranslation(lng, 'common');
+
   return (
     <header className="h-20 bg-surface border-b border-solid border-outline-variant flex items-center justify-between px-8">
       {/* Search Bar */}
@@ -14,7 +23,7 @@ export const Navbar: React.FC = () => {
           </div>
           <input
             type="text"
-            placeholder="Search inventory, SKUs, or orders..."
+            placeholder={t('navbar.search_placeholder')}
             className="w-full bg-[#f8f9fa] border border-solid border-outline-variant/10 rounded-sm py-3.5 pl-14 pr-4 text-sm focus:ring-2 focus:ring-primary/5 focus:bg-white focus:border-primary/20 transition-all outline-none text-on-surface placeholder:text-on-surface-variant/30 font-medium"
           />
         </div>
@@ -24,7 +33,7 @@ export const Navbar: React.FC = () => {
       <div className="flex items-center gap-8">
         <Button className="flex items-center gap-2 h-11 px-6 bg-primary-container hover:bg-primary transition-all shadow-sm">
           <Icon icon={Plus} size={20} className="text-white" />
-          <span className="font-bold tracking-tight">New Product</span>
+          <span className="font-bold tracking-tight">{t('navbar.new_product')}</span>
         </Button>
 
         <div className="flex items-center gap-6 pr-2 border-l border-solid border-outline-variant/30 pl-8">

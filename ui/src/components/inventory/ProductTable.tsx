@@ -4,6 +4,9 @@ import { Badge } from '../ui/Badge';
 import { Icon } from '../ui/Icon';
 import { Card } from '../ui/Card';
 
+import { useTranslation } from '@/i18n/server';
+import { formatCurrency } from '@/lib/format';
+
 export interface Product {
   id: string;
   name: string;
@@ -17,27 +20,30 @@ export interface Product {
 
 interface ProductTableProps {
   products: Product[];
+  lng: string;
 }
 
-const getStockStatus = (level: number) => {
-  if (level <= 0) return { label: 'OUT OF STOCK', variant: 'outline' as const };
-  if (level <= 10) return { label: 'LOW STOCK', variant: 'secondary' as const };
-  return { label: 'IN STOCK', variant: 'primary' as const };
-};
+export const ProductTable = async ({ products, lng }: ProductTableProps) => {
+  const { t } = await useTranslation(lng, 'common');
 
-export const ProductTable: React.FC<ProductTableProps> = ({ products }) => {
+  const getStockStatus = (level: number) => {
+    if (level <= 0) return { label: t('inventory.table.out_of_stock'), variant: 'outline' as const };
+    if (level <= 10) return { label: t('inventory.table.low_stock'), variant: 'secondary' as const };
+    return { label: t('inventory.table.in_stock'), variant: 'primary' as const };
+  };
+
   return (
     <Card className="!p-0 overflow-hidden" shadow>
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-solid border-outline-variant/10 bg-[#f8f9fa]">
-              <th className="px-6 py-6 text-[10px] font-bold tracking-[0.2em] text-on-surface-variant/40 uppercase">Product</th>
-              <th className="px-6 py-6 text-[10px] font-bold tracking-[0.2em] text-on-surface-variant/40 uppercase">SKU</th>
-              <th className="px-6 py-6 text-[10px] font-bold tracking-[0.2em] text-on-surface-variant/40 uppercase">Stock Level</th>
-              <th className="px-6 py-6 text-[10px] font-bold tracking-[0.2em] text-on-surface-variant/40 uppercase text-right">Buy Price</th>
-              <th className="px-6 py-6 text-[10px] font-bold tracking-[0.2em] text-on-surface-variant/40 uppercase text-right">Sale Price</th>
-              <th className="px-6 py-6 text-[10px] font-bold tracking-[0.2em] text-on-surface-variant/40 uppercase text-right">Actions</th>
+              <th className="px-6 py-6 text-[10px] font-bold tracking-[0.2em] text-on-surface-variant/40 uppercase">{t('inventory.table.product')}</th>
+              <th className="px-6 py-6 text-[10px] font-bold tracking-[0.2em] text-on-surface-variant/40 uppercase">{t('inventory.table.sku')}</th>
+              <th className="px-6 py-6 text-[10px] font-bold tracking-[0.2em] text-on-surface-variant/40 uppercase">{t('inventory.table.stock_level')}</th>
+              <th className="px-6 py-6 text-[10px] font-bold tracking-[0.2em] text-on-surface-variant/40 uppercase text-right">{t('inventory.table.buy_price')}</th>
+              <th className="px-6 py-6 text-[10px] font-bold tracking-[0.2em] text-on-surface-variant/40 uppercase text-right">{t('inventory.table.sale_price')}</th>
+              <th className="px-6 py-6 text-[10px] font-bold tracking-[0.2em] text-on-surface-variant/40 uppercase text-right">{t('inventory.table.actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/10">
@@ -69,7 +75,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({ products }) => {
                   <td className="px-6 py-5">
                     <div className="flex flex-col gap-2 min-w-[160px]">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-on-surface">{product.stockLevel} Units</span>
+                        <span className="text-xs font-bold text-on-surface">{product.stockLevel} {t('inventory.table.units')}</span>
                         <Badge variant={status.variant}>{status.label}</Badge>
                       </div>
                       <div className="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
@@ -84,10 +90,10 @@ export const ProductTable: React.FC<ProductTableProps> = ({ products }) => {
                     </div>
                   </td>
                   <td className="px-6 py-5 text-right font-medium text-sm text-on-surface">
-                    ${product.buyPrice.toFixed(2)}
+                    {formatCurrency(product.buyPrice)}
                   </td>
                   <td className="px-6 py-5 text-right font-display font-bold text-sm text-primary-container">
-                    ${product.salePrice.toFixed(2)}
+                    {formatCurrency(product.salePrice)}
                   </td>
                   <td className="px-6 py-5 text-right">
                     <button className="p-2 hover:bg-surface-container rounded-sm transition-colors opacity-0 group-hover:opacity-100">
@@ -103,7 +109,10 @@ export const ProductTable: React.FC<ProductTableProps> = ({ products }) => {
       
       {/* Pagination Placeholder */}
       <div className="px-6 py-4 border-t border-solid border-outline-variant bg-surface-container-lowest flex items-center justify-between">
-        <p className="text-xs text-on-surface-variant/60">Showing 1 to {products.length} of {products.length} products</p>
+        <p className="text-xs text-on-surface-variant/60">
+          {t('inventory.table.showing', { start: 1, end: products.length, total: products.length })}
+        </p>
+...
         <div className="flex gap-2">
           <button className="w-8 h-8 rounded-sm border border-solid border-outline-variant flex items-center justify-center text-xs text-on-surface-variant hover:bg-surface-container-low transition-colors">&lt;</button>
           <button className="w-8 h-8 rounded-sm bg-primary-container text-white flex items-center justify-center text-xs font-bold">1</button>
