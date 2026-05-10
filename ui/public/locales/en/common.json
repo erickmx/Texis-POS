@@ -1,0 +1,49 @@
+{
+  "sidebar": {
+    "warehouse": "MAIN WAREHOUSE",
+    "overview": "Overview",
+    "catalog": "Catalog",
+    "stock_levels": "Stock Levels",
+    "analytics": "Analytics",
+    "history": "History",
+    "help": "Help",
+    "logout": "Logout"
+  },
+  "navbar": {
+    "search_placeholder": "Search inventory, SKUs, or orders...",
+    "new_product": "New Product"
+  },
+  "inventory": {
+    "title": "Product Catalog",
+    "quick_filters": "Quick Filters",
+    "total_items": "TOTAL ITEMS",
+    "low_stock": "LOW STOCK",
+    "health_summary": {
+      "title": "Inventory Health Summary",
+      "optimized": "Your stock levels are <1>{{score}}% optimized</1>.",
+      "urgent_reorder": "There are <1>{{count}} items</1> requiring immediate reorder to prevent stockouts in the next 7 days.",
+      "view_urgent": "VIEW URGENT ORDERS"
+    },
+    "table": {
+      "product": "Product",
+      "sku": "SKU",
+      "stock_level": "Stock Level",
+      "buy_price": "Buy Price",
+      "sale_price": "Sale Price",
+      "actions": "Actions",
+      "units": "Units",
+      "in_stock": "IN STOCK",
+      "low_stock": "LOW STOCK",
+      "out_of_stock": "OUT OF STOCK",
+      "showing": "Showing {{start}} to {{end}} of {{total}} products"
+    },
+    "categories": {
+      "notebooks": "Notebooks",
+      "fine_pens": "Fine Pens",
+      "desk_organizers": "Desk Organizers",
+      "adhesives": "Adhesives",
+      "out_of_stock": "Out of Stock",
+      "new_season": "New Season"
+    }
+  }
+}
