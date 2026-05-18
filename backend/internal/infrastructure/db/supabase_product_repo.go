@@ -6,6 +6,8 @@ import (
 	"fmt"
 
 	"github.com/erickmx/texis-pos/internal/inventory"
+	"github.com/erickmx/texis-pos/internal/inventory/validation"
+	"github.com/supabase-community/postgrest-go"
 	"github.com/supabase-community/supabase-go"
 )
 
@@ -80,4 +82,59 @@ func (r *SupabaseProductRepository) Delete(ctx context.Context, id string) error
 		return err
 	}
 	return nil
+}
+
+func (r *SupabaseProductRepository) GetTotal(ctx context.Context) (int64, error) {
+	_, count, err := r.client.From("products").
+		Select("*", "exact", false).
+		Eq("is_deleted", "false").
+		Execute()
+	if err != nil {
+		return 0, fmt.Errorf("failed to count products: %w", err)
+	}
+	return count, nil
+}
+
+func (r *SupabaseProductRepository) GetLowStock(ctx context.Context) ([]inventory.Product, error) {
+	data, _, err := r.client.From("products").
+		Select("*", "exact", false).
+		Lt("stock_level", "reorder_point").
+		Eq("is_deleted", "false").
+		Execute()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get low stock products: %w", err)
+	}
+	var products []inventory.Product
+	if err := json.Unmarshal([]byte(data), &products); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal low stock products: %w", err)
+	}
+	return products, nil
+}
+
+func (r *SupabaseProductRepository) GetAllFiltered(ctx context.Context, filter validation.ProductFilter) ([]inventory.Product, int64, error) {
+	qb := r.client.From("products").
+		Select("*", "exact", false).
+		Eq("is_deleted", "false")
+
+	if filter.Search != "" {
+		qb = qb.Ilike("title", "%"+filter.Search+"%")
+	}
+
+	ascending := filter.SortOrder == "asc"
+	qb = qb.Order(filter.SortBy, &postgrest.OrderOpts{Ascending: ascending})
+
+	offset := (filter.Page - 1) * filter.Limit
+	qb = qb.Range(offset, offset+filter.Limit-1, "")
+
+	data, count, err := qb.Execute()
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to list products: %w", err)
+	}
+
+	var products []inventory.Product
+	if err := json.Unmarshal([]byte(data), &products); err != nil {
+		return nil, 0, fmt.Errorf("failed to unmarshal products: %w", err)
+	}
+
+	return products, count, nil
 }

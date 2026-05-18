@@ -4,7 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"strings"
+
+	"github.com/erickmx/texis-pos/internal/inventory/validation"
 )
 
 var (
@@ -82,4 +85,34 @@ func extractFilenameFromURL(imageURL string) string {
 		return lastPart[:idx]
 	}
 	return lastPart
+}
+
+func (s *Service) GetTotal(ctx context.Context) (int64, error) {
+	return s.repo.GetTotal(ctx)
+}
+
+func (s *Service) GetLowStock(ctx context.Context) ([]Product, error) {
+	return s.repo.GetLowStock(ctx)
+}
+
+func (s *Service) GetAllFiltered(ctx context.Context, filter validation.ProductFilter) (ProductListResponse, error) {
+	products, total, err := s.repo.GetAllFiltered(ctx, filter)
+	if err != nil {
+		return ProductListResponse{}, err
+	}
+
+	totalPages := 0
+	if total > 0 {
+		totalPages = int(math.Ceil(float64(total) / float64(filter.Limit)))
+	}
+
+	return ProductListResponse{
+		Data: products,
+		Meta: PaginationMeta{
+			Page:       filter.Page,
+			Limit:      filter.Limit,
+			Total:      total,
+			TotalPages: totalPages,
+		},
+	}, nil
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/erickmx/texis-pos/internal/infrastructure/db"
 	storageInfra "github.com/erickmx/texis-pos/internal/infrastructure/storage"
 	"github.com/erickmx/texis-pos/internal/inventory"
+	"github.com/erickmx/texis-pos/internal/orders"
 	"github.com/erickmx/texis-pos/internal/storage"
 	"github.com/erickmx/texis-pos/pkg/supabase"
 	"github.com/gofiber/fiber/v3"
@@ -62,6 +63,7 @@ func main() {
 	// 4. Initialize Infrastructure
 	sbClient := supabase.GetClient()
 	productRepo := db.NewSupabaseProductRepository(sbClient)
+	orderRepo := db.NewSupabaseOrderRepository(sbClient)
 	storageProvider := storageInfra.NewSupabaseStorageProvider(sbClient)
 
 	// 5. Initialize Services
@@ -79,18 +81,21 @@ func main() {
 	)
 	storageSvc := storage.NewService(storageProvider)
 	inventorySvc := inventory.NewService(productRepo, storageSvc)
+	orderSvc := orders.NewService(orderRepo)
 
 	// 6. Initialize Handlers
 	authHandler := auth.NewHandler(authSvc)
 	storageHandler := storage.NewHandler(storageSvc, authSvc)
 	inventoryHandler := inventory.NewHandler(inventorySvc, authSvc)
+	orderHandler := orders.NewHandler(orderSvc)
 
 	// 7. Register Routes
 	app.Post("/api/login", authHandler.Login)
 	storageHandler.RegisterRoutes(app)
 	inventoryHandler.RegisterRoutes(app)
+	orderHandler.RegisterRoutes(app)
 
-	// 7. Start Server
+	// 8. Start Server
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
