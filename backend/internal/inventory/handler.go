@@ -2,6 +2,7 @@ package inventory
 
 import (
 	"github.com/erickmx/texis-pos/internal/auth"
+	"github.com/erickmx/texis-pos/internal/inventory/validation"
 	"github.com/gofiber/fiber/v3"
 )
 
@@ -20,7 +21,9 @@ func NewHandler(service *Service, authService auth.AuthService) *Handler {
 func (h *Handler) RegisterRoutes(app *fiber.App) {
 	api := app.Group("/api/products")
 
-	// Get is available for everyone
+	// Static routes FIRST (before /:id)
+	api.Get("/total", h.GetTotal)
+	api.Get("/stock/low", h.GetLowStock)
 	api.Get("/", h.GetAll)
 	api.Get("/:id", h.GetByID)
 
@@ -30,12 +33,40 @@ func (h *Handler) RegisterRoutes(app *fiber.App) {
 	api.Delete("/:id", auth.IsAdmin(h.authService), h.Delete)
 }
 
-func (h *Handler) GetAll(c fiber.Ctx) error {
-	products, err := h.service.GetAll(c.Context())
+func (h *Handler) GetTotal(c fiber.Ctx) error {
+	total, err := h.service.GetTotal(c.Context())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.JSON(fiber.Map{"total": total})
+}
+
+func (h *Handler) GetLowStock(c fiber.Ctx) error {
+	products, err := h.service.GetLowStock(c.Context())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.JSON(products)
+}
+
+func (h *Handler) GetAll(c fiber.Ctx) error {
+	values := map[string]string{
+		"page":       c.Query("page"),
+		"limit":      c.Query("limit"),
+		"search":     c.Query("search"),
+		"sort_by":    c.Query("sort_by"),
+		"sort_order": c.Query("sort_order"),
+	}
+	filter := validation.ParseProductFilter(values)
+	if errs := filter.Validate(); len(errs) > 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"errors": errs})
+	}
+
+	resp, err := h.service.GetAllFiltered(c.Context(), filter)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.JSON(resp)
 }
 
 func (h *Handler) GetByID(c fiber.Ctx) error {
