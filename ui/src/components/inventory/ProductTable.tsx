@@ -1,11 +1,12 @@
 import React from 'react';
-import { Pencil } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { Icon } from '../ui/Icon';
 import { Card } from '../ui/Card';
 
 import { useTranslation } from '@/i18n/server';
 import { formatCurrency } from '@/lib/format';
+import { EditProductButton } from './EditProductButton';
+import { Category } from '@/lib/validations/product';
 
 export interface Product {
   id: string;
@@ -16,6 +17,8 @@ export interface Product {
   buyPrice: number;
   salePrice: number;
   image: string;
+  category: Category;
+  satCode?: string;
 }
 
 interface ProductTableProps {
@@ -96,9 +99,19 @@ export const ProductTable = async ({ products, lng }: ProductTableProps) => {
                     {formatCurrency(product.salePrice)}
                   </td>
                   <td className="px-6 py-5 text-right">
-                    <button className="p-2 hover:bg-surface-container rounded-sm transition-colors opacity-0 group-hover:opacity-100">
-                      <Icon icon={Pencil} size={16} className="text-on-surface-variant hover:text-primary" />
-                    </button>
+                    <EditProductButton
+                      product={{
+                        id: product.id,
+                        name: product.name,
+                        description: product.description,
+                        category: product.category,
+                        satCode: product.satCode,
+                        buyPrice: product.buyPrice,
+                        salePrice: product.salePrice,
+                        stockLevel: product.stockLevel,
+                        image: product.image,
+                      }}
+                    />
                   </td>
                 </tr>
               );
