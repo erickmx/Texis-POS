@@ -44,6 +44,45 @@
       "adhesives": "Adhesivos",
       "out_of_stock": "Sin Stock",
       "new_season": "Nueva Temporada"
+    },
+    "modal": {
+      "create_title": "Nuevo Producto",
+      "edit_title": "Editar Producto",
+      "name": "Nombre del Producto",
+      "name_placeholder": "Ingresa el nombre del producto",
+      "description": "Descripción",
+      "description_placeholder": "Ingresa la descripción del producto",
+      "category": "Categoría",
+      "category_placeholder": "Selecciona una categoría",
+      "sat_code": "Código Fiscal SAT",
+      "sat_code_placeholder": "Código numérico de 8 dígitos",
+      "buy_price": "Precio de Compra",
+      "sale_price": "Precio de Venta",
+      "stock": "Stock Inicial",
+      "image": "Imagen del Producto",
+      "image_drop": "Arrastra y suelta una imagen aquí, o haz clic para seleccionar",
+      "image_types": "JPEG, PNG, WebP hasta 5MB",
+      "profit_margin": "Margen de Ganancia Estimado",
+      "profit_margin_na": "N/D",
+      "profit_margin_value": "{{percent}}% ({{amount}} por unidad)",
+      "save": "Guardar Producto",
+      "cancel": "Cancelar",
+      "success_create": "Producto creado exitosamente",
+      "success_edit": "Producto actualizado exitosamente",
+      "image_remove": "Eliminar imagen",
+      "image_preview_alt": "Vista previa del producto",
+      "error_generic": "Algo salió mal. Por favor intenta de nuevo.",
+      "errors": {
+        "name_required": "El nombre del producto es obligatorio",
+        "name_max": "El nombre debe tener como máximo 120 caracteres",
+        "category_required": "La categoría es obligatoria",
+        "sat_code_invalid": "El código SAT debe tener exactamente 8 dígitos",
+        "buy_price_positive": "El precio de compra debe ser un número positivo",
+        "sale_price_positive": "El precio de venta debe ser un número positivo",
+        "stock_nonnegative": "El stock debe ser un entero no negativo",
+        "image_size": "La imagen debe pesar menos de 5MB",
+        "image_type": "Solo se aceptan imágenes JPEG, PNG y WebP"
+      }
     }
   }
 }

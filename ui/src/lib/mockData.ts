@@ -10,6 +10,8 @@ export const MOCK_PRODUCTS: Product[] = [
     buyPrice: 12.50,
     salePrice: 24.00,
     image: '/images/notebook.png',
+    category: 'notebooks',
+    satCode: '12345678',
   },
   {
     id: '2',
@@ -20,6 +22,8 @@ export const MOCK_PRODUCTS: Product[] = [
     buyPrice: 45.00,
     salePrice: 89.99,
     image: '/images/pen.png',
+    category: 'fine_pens',
+    satCode: '87654321',
   },
   {
     id: '3',
@@ -30,6 +34,8 @@ export const MOCK_PRODUCTS: Product[] = [
     buyPrice: 4.10,
     salePrice: 12.00,
     image: '/images/clips.png',
+    category: 'desk_organizers',
+    satCode: '11112222',
   },
   {
     id: '4',
@@ -40,6 +46,8 @@ export const MOCK_PRODUCTS: Product[] = [
     buyPrice: 8.00,
     salePrice: 18.50,
     image: '/images/tape.png',
+    category: 'adhesives',
+    satCode: '33334444',
   },
 ];
 

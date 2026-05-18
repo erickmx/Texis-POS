@@ -5,6 +5,7 @@ import { Search, Plus, Bell, Settings } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
 import { useTranslation } from '@/i18n/client';
+import { useInventoryModal } from '../providers/InventoryModalProvider';
 
 interface NavbarProps {
   lng: string;
@@ -12,6 +13,7 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ lng }) => {
   const { t } = useTranslation(lng, 'common');
+  const { openCreate } = useInventoryModal();
 
   return (
     <header className="h-20 bg-surface border-b border-solid border-outline-variant flex items-center justify-between px-8">
@@ -31,7 +33,10 @@ export const Navbar: React.FC<NavbarProps> = ({ lng }) => {
 
       {/* Actions & Profile */}
       <div className="flex items-center gap-8">
-        <Button className="flex items-center gap-2 h-11 px-6 bg-primary-container hover:bg-primary transition-all shadow-sm">
+        <Button
+          onClick={openCreate}
+          className="flex items-center gap-2 h-11 px-6 bg-primary-container hover:bg-primary transition-all shadow-sm"
+        >
           <Icon icon={Plus} size={20} className="text-white" />
           <span className="font-bold tracking-tight">{t('navbar.new_product')}</span>
         </Button>

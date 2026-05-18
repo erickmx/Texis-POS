@@ -44,6 +44,45 @@
       "adhesives": "Adhesives",
       "out_of_stock": "Out of Stock",
       "new_season": "New Season"
+    },
+    "modal": {
+      "create_title": "New Product",
+      "edit_title": "Edit Product",
+      "name": "Product Name",
+      "name_placeholder": "Enter product name",
+      "description": "Description",
+      "description_placeholder": "Enter product description",
+      "category": "Category",
+      "category_placeholder": "Select a category",
+      "sat_code": "SAT Fiscal Code",
+      "sat_code_placeholder": "8-digit numeric code",
+      "buy_price": "Buy Price",
+      "sale_price": "Sale Price",
+      "stock": "Initial Stock",
+      "image": "Product Image",
+      "image_drop": "Drag and drop an image here, or click to select",
+      "image_types": "JPEG, PNG, WebP up to 5MB",
+      "profit_margin": "Estimated Profit Margin",
+      "profit_margin_na": "N/A",
+      "profit_margin_value": "{{percent}}% ({{amount}} per unit)",
+      "save": "Save Product",
+      "cancel": "Cancel",
+      "success_create": "Product created successfully",
+      "success_edit": "Product updated successfully",
+      "image_remove": "Remove image",
+      "image_preview_alt": "Product preview",
+      "error_generic": "Something went wrong. Please try again.",
+      "errors": {
+        "name_required": "Product name is required",
+        "name_max": "Product name must be at most 120 characters",
+        "category_required": "Category is required",
+        "sat_code_invalid": "SAT code must be exactly 8 digits",
+        "buy_price_positive": "Buy price must be a positive number",
+        "sale_price_positive": "Sale price must be a positive number",
+        "stock_nonnegative": "Stock must be a non-negative integer",
+        "image_size": "Image must be under 5MB",
+        "image_type": "Only JPEG, PNG, and WebP images are accepted"
+      }
     }
   }
 }

@@ -1,5 +1,7 @@
 import { render, screen, act } from '@testing-library/react';
 import { ProductTable } from '../ProductTable';
+import { InventoryModalProvider } from '../../providers/InventoryModalProvider';
+import { Category } from '@/lib/validations/product';
 
 const mockProducts = [
   {
@@ -11,6 +13,8 @@ const mockProducts = [
     buyPrice: 12.50,
     salePrice: 24.00,
     image: '/notebook.png',
+    category: 'notebooks' as Category,
+    satCode: '12345678',
   },
 ];
 
@@ -31,9 +35,12 @@ jest.mock('@/i18n/server', () => ({
 
 describe('ProductTable Component', () => {
   it('should render product name and translated labels', async () => {
-    // Since it's an async component, we await its render or use findBy
     await act(async () => {
-      render(await ProductTable({ products: mockProducts, lng: 'es' }) as any);
+      render(
+        <InventoryModalProvider>
+          {await ProductTable({ products: mockProducts, lng: 'es' }) as any}
+        </InventoryModalProvider>
+      );
     });
     
     expect(screen.getByText('Artisan Talavera Notebook')).toBeInTheDocument();
