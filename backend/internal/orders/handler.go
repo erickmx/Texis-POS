@@ -1,6 +1,8 @@
 package orders
 
 import (
+	"log"
+
 	"github.com/erickmx/texis-pos/internal/orders/validation"
 	"github.com/gofiber/fiber/v3"
 )
@@ -34,7 +36,8 @@ func (h *Handler) ListOrders(c fiber.Ctx) error {
 
 	resp, err := h.service.ListOrders(c.Context(), filter)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		log.Printf("ListOrders error: %v", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "internal server error"})
 	}
 	return c.JSON(resp)
 }

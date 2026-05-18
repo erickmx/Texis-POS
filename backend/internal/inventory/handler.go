@@ -1,6 +1,8 @@
 package inventory
 
 import (
+	"log"
+
 	"github.com/erickmx/texis-pos/internal/auth"
 	"github.com/erickmx/texis-pos/internal/inventory/validation"
 	"github.com/gofiber/fiber/v3"
@@ -36,7 +38,8 @@ func (h *Handler) RegisterRoutes(app *fiber.App) {
 func (h *Handler) GetTotal(c fiber.Ctx) error {
 	total, err := h.service.GetTotal(c.Context())
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		log.Printf("GetTotal error: %v", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "internal server error"})
 	}
 	return c.JSON(fiber.Map{"total": total})
 }
@@ -44,7 +47,8 @@ func (h *Handler) GetTotal(c fiber.Ctx) error {
 func (h *Handler) GetLowStock(c fiber.Ctx) error {
 	products, err := h.service.GetLowStock(c.Context())
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		log.Printf("GetLowStock error: %v", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "internal server error"})
 	}
 	return c.JSON(products)
 }
@@ -64,7 +68,8 @@ func (h *Handler) GetAll(c fiber.Ctx) error {
 
 	resp, err := h.service.GetAllFiltered(c.Context(), filter)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		log.Printf("GetAll error: %v", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "internal server error"})
 	}
 	return c.JSON(resp)
 }
@@ -76,7 +81,8 @@ func (h *Handler) GetByID(c fiber.Ctx) error {
 		if err == ErrProductNotFound {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "product not found"})
 		}
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		log.Printf("GetByID error: %v", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "internal server error"})
 	}
 	return c.JSON(product)
 }
@@ -92,7 +98,8 @@ func (h *Handler) Create(c fiber.Ctx) error {
 		if err == ErrImageNotFound {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "image does not exist in storage"})
 		}
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		log.Printf("Create error: %v", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "internal server error"})
 	}
 	return c.Status(fiber.StatusCreated).JSON(product)
 }
@@ -112,7 +119,8 @@ func (h *Handler) Update(c fiber.Ctx) error {
 		if err == ErrImageNotFound {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "image does not exist in storage"})
 		}
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		log.Printf("Update error: %v", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "internal server error"})
 	}
 	return c.JSON(product)
 }
@@ -124,7 +132,8 @@ func (h *Handler) Delete(c fiber.Ctx) error {
 		if err == ErrProductNotFound {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "product not found"})
 		}
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		log.Printf("Delete error: %v", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "internal server error"})
 	}
 	return c.SendStatus(fiber.StatusNoContent)
 }

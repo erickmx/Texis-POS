@@ -2,11 +2,6 @@ package orders
 
 import "time"
 
-type FieldError struct {
-	Field   string `json:"field"`
-	Message string `json:"message"`
-}
-
 type PaginationMeta struct {
 	Page       int   `json:"page"`
 	Limit      int   `json:"limit"`

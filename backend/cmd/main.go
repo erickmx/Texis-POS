@@ -95,7 +95,7 @@ func main() {
 	inventoryHandler.RegisterRoutes(app)
 	orderHandler.RegisterRoutes(app)
 
-	// 7. Start Server
+	// 8. Start Server
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"

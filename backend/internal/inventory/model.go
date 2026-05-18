@@ -46,11 +46,6 @@ type UpdateProductDTO struct {
 	ImageURL     *string  `json:"image_url"`
 }
 
-type FieldError struct {
-	Field   string `json:"field"`
-	Message string `json:"message"`
-}
-
 type PaginationMeta struct {
 	Page       int   `json:"page"`
 	Limit      int   `json:"limit"`
