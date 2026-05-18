@@ -46,8 +46,9 @@
       "new_season": "New Season"
     },
     "modal": {
-      "create_title": "New Product",
+      "create_title": "Add New Product",
       "edit_title": "Edit Product",
+      "subtitle": "Update your 'Texis' stationery inventory",
       "name": "Product Name",
       "name_placeholder": "Enter product name",
       "description": "Description",
@@ -62,6 +63,8 @@
       "image": "Product Image",
       "image_drop": "Drag and drop an image here, or click to select",
       "image_types": "JPEG, PNG, WebP up to 5MB",
+      "pricing_stock": "Pricing & Stock",
+      "per_unit": "per unit",
       "profit_margin": "Estimated Profit Margin",
       "profit_margin_na": "N/A",
       "profit_margin_value": "{{percent}}% ({{amount}} per unit)",

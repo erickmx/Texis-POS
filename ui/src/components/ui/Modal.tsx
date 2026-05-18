@@ -8,10 +8,11 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
+  subtitle?: string;
   children: React.ReactNode;
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, subtitle, children }) => {
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -64,12 +65,19 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
       >
         {/* Header */}
         <div className="flex items-center justify-between px-8 py-6 border-b border-outline-variant/10">
-          <h2
-            id="modal-title"
-            className="text-xl font-display font-bold text-on-surface tracking-tight"
-          >
-            {title}
-          </h2>
+          <div className="flex flex-col gap-1">
+            <h2
+              id="modal-title"
+              className="text-xl font-display font-bold text-on-surface tracking-tight"
+            >
+              {title}
+            </h2>
+            {subtitle && (
+              <p className="text-sm text-on-surface-variant/60">
+                {subtitle}
+              </p>
+            )}
+          </div>
           <button
             ref={closeButtonRef}
             onClick={onClose}

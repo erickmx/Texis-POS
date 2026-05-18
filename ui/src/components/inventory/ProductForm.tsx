@@ -8,6 +8,8 @@ import { productSchema, ProductFormData, CATEGORIES } from '@/lib/validations/pr
 import { Button } from '../ui/Button';
 import { ImageDropZone } from './ImageDropZone';
 import { ModalProduct } from '../providers/InventoryModalProvider';
+import { TrendingUp } from 'lucide-react';
+import { Icon } from '../ui/Icon';
 
 interface ProductFormProps {
   mode: 'create' | 'edit';
@@ -61,7 +63,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     if (!buy || buy <= 0) return null;
     const percent = ((sale - buy) / buy) * 100;
     const amount = sale - buy;
-    return { percent: percent.toFixed(2), amount: amount.toFixed(2) };
+    return { percent: percent.toFixed(1), amount: amount.toFixed(2) };
   }, [buyPrice, salePrice]);
 
   const getErrorMessage = (errorKey?: string): string | undefined => {
@@ -71,6 +73,22 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+      {/* Image Drop Zone - TOP */}
+      <div className="flex flex-col gap-1.5">
+        <Controller
+          name="image"
+          control={control}
+          render={({ field }) => (
+            <ImageDropZone
+              value={field.value}
+              onChange={field.onChange}
+              error={getErrorMessage(errors.image?.message)}
+              lng={lng}
+            />
+          )}
+        />
+      </div>
+
       {/* Product Name */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="name" className="text-sm font-medium text-on-surface-variant">
@@ -106,161 +124,158 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         />
       </div>
 
-      {/* Category */}
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="category" className="text-sm font-medium text-on-surface-variant">
-          {t('inventory.modal.category')}
-        </label>
-        <select
-          id="category"
-          className={`w-full bg-surface-container-lowest border rounded-xl px-4 py-3 text-sm outline-none transition-all ${
-            errors.category
-              ? 'border-[#e53935] focus:border-[#e53935] focus:ring-2 focus:ring-[#e53935]/10'
-              : 'border-outline-variant/15 focus:border-primary-container focus:ring-2 focus:ring-primary-container/10'
-          }`}
-          {...register('category')}
-        >
-          <option value="">{t('inventory.modal.category_placeholder')}</option>
-          {CATEGORIES.map((cat) => (
-            <option key={cat} value={cat}>
-              {t(`inventory.categories.${cat}`)}
-            </option>
-          ))}
-        </select>
-        {errors.category && (
-          <p className="text-xs text-[#e53935] font-medium">{getErrorMessage(errors.category.message)}</p>
-        )}
-      </div>
-
-      {/* SAT Fiscal Code */}
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="satCode" className="text-sm font-medium text-on-surface-variant">
-          {t('inventory.modal.sat_code')}
-        </label>
-        <input
-          id="satCode"
-          type="text"
-          inputMode="numeric"
-          maxLength={8}
-          placeholder={t('inventory.modal.sat_code_placeholder')}
-          className={`w-full bg-surface-container-lowest border rounded-xl px-4 py-3 text-sm outline-none transition-all placeholder:text-on-surface-variant/30 ${
-            errors.satCode
-              ? 'border-[#e53935] focus:border-[#e53935] focus:ring-2 focus:ring-[#e53935]/10'
-              : 'border-outline-variant/15 focus:border-primary-container focus:ring-2 focus:ring-primary-container/10'
-          }`}
-          {...register('satCode')}
-        />
-        {errors.satCode && (
-          <p className="text-xs text-[#e53935] font-medium">{getErrorMessage(errors.satCode.message)}</p>
-        )}
-      </div>
-
-      {/* Prices Row */}
+      {/* Category + SAT Fiscal Code - 2 columns */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="buyPrice" className="text-sm font-medium text-on-surface-variant">
-            {t('inventory.modal.buy_price')}
+          <label htmlFor="category" className="text-sm font-medium text-on-surface-variant">
+            {t('inventory.modal.category')}
           </label>
-          <input
-            id="buyPrice"
-            type="number"
-            step="0.01"
-            min={0}
-            placeholder="0.00"
-            className={`w-full bg-surface-container-lowest border rounded-xl px-4 py-3 text-sm outline-none transition-all placeholder:text-on-surface-variant/30 ${
-              errors.buyPrice
+          <select
+            id="category"
+            className={`w-full bg-surface-container-lowest border rounded-xl px-4 py-3 text-sm outline-none transition-all ${
+              errors.category
                 ? 'border-[#e53935] focus:border-[#e53935] focus:ring-2 focus:ring-[#e53935]/10'
                 : 'border-outline-variant/15 focus:border-primary-container focus:ring-2 focus:ring-primary-container/10'
             }`}
-            {...register('buyPrice')}
-          />
-          {errors.buyPrice && (
-            <p className="text-xs text-[#e53935] font-medium">{getErrorMessage(errors.buyPrice.message)}</p>
+            {...register('category')}
+          >
+            <option value="">{t('inventory.modal.category_placeholder')}</option>
+            {CATEGORIES.map((cat) => (
+              <option key={cat} value={cat}>
+                {t(`inventory.categories.${cat}`)}
+              </option>
+            ))}
+          </select>
+          {errors.category && (
+            <p className="text-xs text-[#e53935] font-medium">{getErrorMessage(errors.category.message)}</p>
           )}
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="salePrice" className="text-sm font-medium text-on-surface-variant">
-            {t('inventory.modal.sale_price')}
+          <label htmlFor="satCode" className="text-sm font-medium text-on-surface-variant">
+            {t('inventory.modal.sat_code')}
           </label>
           <input
-            id="salePrice"
-            type="number"
-            step="0.01"
-            min={0}
-            placeholder="0.00"
+            id="satCode"
+            type="text"
+            inputMode="numeric"
+            maxLength={8}
+            placeholder={t('inventory.modal.sat_code_placeholder')}
             className={`w-full bg-surface-container-lowest border rounded-xl px-4 py-3 text-sm outline-none transition-all placeholder:text-on-surface-variant/30 ${
-              errors.salePrice
+              errors.satCode
                 ? 'border-[#e53935] focus:border-[#e53935] focus:ring-2 focus:ring-[#e53935]/10'
                 : 'border-outline-variant/15 focus:border-primary-container focus:ring-2 focus:ring-primary-container/10'
             }`}
-            {...register('salePrice')}
+            {...register('satCode')}
           />
-          {errors.salePrice && (
-            <p className="text-xs text-[#e53935] font-medium">{getErrorMessage(errors.salePrice.message)}</p>
+          {errors.satCode && (
+            <p className="text-xs text-[#e53935] font-medium">{getErrorMessage(errors.satCode.message)}</p>
           )}
         </div>
       </div>
 
-      {/* Profit Margin */}
-      <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-surface-container-low border border-outline-variant/10">
-        <span className="text-sm font-medium text-on-surface-variant">
-          {t('inventory.modal.profit_margin')}
-        </span>
-        <span className="text-sm font-bold text-primary-container font-display">
-          {profitMargin
-            ? t('inventory.modal.profit_margin_value', {
-                percent: profitMargin.percent,
-                amount: `$${profitMargin.amount}`,
-              })
-            : t('inventory.modal.profit_margin_na')}
-        </span>
-      </div>
+      {/* Pricing & Stock Section */}
+      <div className="rounded-xl bg-surface-container-low p-6 flex flex-col gap-5">
+        <h3 className="text-base font-display font-bold text-primary-container">
+          {t('inventory.modal.pricing_stock')}
+        </h3>
 
-      {/* Stock */}
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="stock" className="text-sm font-medium text-on-surface-variant">
-          {t('inventory.modal.stock')}
-        </label>
-        <input
-          id="stock"
-          type="number"
-          min={0}
-          step={1}
-          placeholder="0"
-          className={`w-full bg-surface-container-lowest border rounded-xl px-4 py-3 text-sm outline-none transition-all placeholder:text-on-surface-variant/30 ${
-            errors.stock
-              ? 'border-[#e53935] focus:border-[#e53935] focus:ring-2 focus:ring-[#e53935]/10'
-              : 'border-outline-variant/15 focus:border-primary-container focus:ring-2 focus:ring-primary-container/10'
-          }`}
-          {...register('stock')}
-        />
-        {errors.stock && (
-          <p className="text-xs text-[#e53935] font-medium">{getErrorMessage(errors.stock.message)}</p>
-        )}
-      </div>
-
-      {/* Image */}
-      <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-on-surface-variant">
-          {t('inventory.modal.image')}
-        </label>
-        <Controller
-          name="image"
-          control={control}
-          render={({ field }) => (
-            <ImageDropZone
-              value={field.value}
-              onChange={field.onChange}
-              error={getErrorMessage(errors.image?.message)}
-              lng={lng}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Buy Price */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="buyPrice" className="text-sm font-medium text-on-surface-variant">
+              {t('inventory.modal.buy_price')}
+            </label>
+            <input
+              id="buyPrice"
+              type="number"
+              step="0.01"
+              min={0}
+              placeholder="$ 0.00"
+              className={`w-full bg-surface-container-lowest border rounded-xl px-4 py-3 text-sm outline-none transition-all placeholder:text-on-surface-variant/30 ${
+                errors.buyPrice
+                  ? 'border-[#e53935] focus:border-[#e53935] focus:ring-2 focus:ring-[#e53935]/10'
+                  : 'border-outline-variant/15 focus:border-primary-container focus:ring-2 focus:ring-primary-container/10'
+              }`}
+              {...register('buyPrice')}
             />
-          )}
-        />
+            {errors.buyPrice && (
+              <p className="text-xs text-[#e53935] font-medium">{getErrorMessage(errors.buyPrice.message)}</p>
+            )}
+          </div>
+
+          {/* Sale Price */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="salePrice" className="text-sm font-medium text-on-surface-variant">
+              {t('inventory.modal.sale_price')}
+            </label>
+            <input
+              id="salePrice"
+              type="number"
+              step="0.01"
+              min={0}
+              placeholder="$ 0.00"
+              className={`w-full bg-surface-container-lowest border rounded-xl px-4 py-3 text-sm outline-none transition-all placeholder:text-on-surface-variant/30 ${
+                errors.salePrice
+                  ? 'border-[#e53935] focus:border-[#e53935] focus:ring-2 focus:ring-[#e53935]/10'
+                  : 'border-outline-variant/15 focus:border-primary-container focus:ring-2 focus:ring-primary-container/10'
+              }`}
+              {...register('salePrice')}
+            />
+            {errors.salePrice && (
+              <p className="text-xs text-[#e53935] font-medium">{getErrorMessage(errors.salePrice.message)}</p>
+            )}
+          </div>
+
+          {/* Initial Stock */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="stock" className="text-sm font-medium text-on-surface-variant">
+              {t('inventory.modal.stock')}
+            </label>
+            <input
+              id="stock"
+              type="number"
+              min={0}
+              step={1}
+              placeholder="0"
+              className={`w-full bg-surface-container-lowest border rounded-xl px-4 py-3 text-sm outline-none transition-all placeholder:text-on-surface-variant/30 ${
+                errors.stock
+                  ? 'border-[#e53935] focus:border-[#e53935] focus:ring-2 focus:ring-[#e53935]/10'
+                  : 'border-outline-variant/15 focus:border-primary-container focus:ring-2 focus:ring-primary-container/10'
+              }`}
+              {...register('stock')}
+            />
+            {errors.stock && (
+              <p className="text-xs text-[#e53935] font-medium">{getErrorMessage(errors.stock.message)}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Estimated Profit Margin */}
+        <div className="flex items-center gap-3 pt-2">
+          <div className="p-1.5 rounded-lg bg-secondary-container/20">
+            <Icon icon={TrendingUp} size={16} className="text-secondary-container" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-bold tracking-[0.15em] text-on-surface-variant/50 uppercase">
+              {t('inventory.modal.profit_margin')}
+            </span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-xl font-display font-bold text-secondary-container">
+                {profitMargin ? `${profitMargin.percent}%` : t('inventory.modal.profit_margin_na')}
+              </span>
+              {profitMargin && (
+                <span className="text-xs text-on-surface-variant/60">
+                  (${profitMargin.amount} {t('inventory.modal.per_unit')})
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-end gap-3 pt-4 border-t border-outline-variant/10">
+      <div className="flex items-center justify-end gap-3 pt-2">
         <Button type="button" variant="ghost" onClick={onCancel}>
           {t('inventory.modal.cancel')}
         </Button>

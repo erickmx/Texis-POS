@@ -18,9 +18,13 @@ jest.mock('react-i18next', () => ({
         'inventory.modal.sale_price': 'Sale Price',
         'inventory.modal.stock': 'Initial Stock',
         'inventory.modal.image': 'Product Image',
+        'inventory.modal.image_drop': 'Drag and drop an image here',
+        'inventory.modal.image_types': 'JPEG, PNG, WebP up to 5MB',
+        'inventory.modal.pricing_stock': 'Pricing & Stock',
         'inventory.modal.profit_margin': 'Estimated Profit Margin',
         'inventory.modal.profit_margin_na': 'N/A',
-        'inventory.modal.profit_margin_value': '{{percent}}% ({{amount}} per unit)',
+        'inventory.modal.profit_margin_value': '{{percent}}% (${{amount}} per unit)',
+        'inventory.modal.per_unit': 'per unit',
         'inventory.modal.save': 'Save Product',
         'inventory.modal.cancel': 'Cancel',
         'inventory.categories.notebooks': 'Notebooks',
@@ -71,7 +75,7 @@ describe('ProductForm', () => {
     expect(screen.getByLabelText('Buy Price')).toBeInTheDocument();
     expect(screen.getByLabelText('Sale Price')).toBeInTheDocument();
     expect(screen.getByLabelText('Initial Stock')).toBeInTheDocument();
-    expect(screen.getByText('Product Image')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Product Image' })).toBeInTheDocument();
   });
 
   it('should pre-fill fields in edit mode.', () => {
@@ -103,7 +107,8 @@ describe('ProductForm', () => {
     renderForm();
     fireEvent.change(screen.getByLabelText('Buy Price'), { target: { value: '50' } });
     fireEvent.change(screen.getByLabelText('Sale Price'), { target: { value: '75' } });
-    expect(screen.getByText('50.00% ($25.00 per unit)')).toBeInTheDocument();
+    expect(screen.getByText('50.0%')).toBeInTheDocument();
+    expect(screen.getByText(/25\.00/)).toBeInTheDocument();
   });
 
   it('should call onSubmit with valid data.', async () => {

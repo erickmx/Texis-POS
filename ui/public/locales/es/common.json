@@ -46,8 +46,9 @@
       "new_season": "Nueva Temporada"
     },
     "modal": {
-      "create_title": "Nuevo Producto",
+      "create_title": "Agregar Nuevo Producto",
       "edit_title": "Editar Producto",
+      "subtitle": "Actualiza tu inventario de papelería 'Texis'",
       "name": "Nombre del Producto",
       "name_placeholder": "Ingresa el nombre del producto",
       "description": "Descripción",
@@ -62,6 +63,8 @@
       "image": "Imagen del Producto",
       "image_drop": "Arrastra y suelta una imagen aquí, o haz clic para seleccionar",
       "image_types": "JPEG, PNG, WebP hasta 5MB",
+      "pricing_stock": "Precios y Stock",
+      "per_unit": "por unidad",
       "profit_margin": "Margen de Ganancia Estimado",
       "profit_margin_na": "N/D",
       "profit_margin_value": "{{percent}}% ({{amount}} por unidad)",

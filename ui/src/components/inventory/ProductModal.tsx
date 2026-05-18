@@ -49,8 +49,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({ lng }) => {
     ? t('inventory.modal.create_title')
     : t('inventory.modal.edit_title');
 
+  const subtitle = t('inventory.modal.subtitle');
+
   return (
-    <Modal isOpen={isOpen} onClose={close} title={title}>
+    <Modal isOpen={isOpen} onClose={close} title={title} subtitle={subtitle}>
       <ProductForm
         mode={mode}
         initialData={product}
