@@ -45,3 +45,15 @@ type UpdateProductDTO struct {
 	ReorderPoint *int     `json:"reorder_point"`
 	ImageURL     *string  `json:"image_url"`
 }
+
+type PaginationMeta struct {
+	Page       int   `json:"page"`
+	Limit      int   `json:"limit"`
+	Total      int64 `json:"total"`
+	TotalPages int   `json:"total_pages"`
+}
+
+type ProductListResponse struct {
+	Data []Product      `json:"data"`
+	Meta PaginationMeta `json:"meta"`
+}
