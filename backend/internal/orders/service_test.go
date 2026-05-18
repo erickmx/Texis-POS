@@ -20,12 +20,12 @@ func (m *MockOrderRepo) List(ctx context.Context, filter validation.OrderFilter)
 }
 
 func TestOrderService_ListOrders(t *testing.T) {
-	mockRepo := new(MockOrderRepo)
-	service := NewService(mockRepo)
 	ctx := context.Background()
 	filter := validation.OrderFilter{Page: 1, Limit: 20, SortBy: "created_at", SortOrder: "desc"}
 
 	t.Run("Success with meta", func(t *testing.T) {
+		mockRepo := new(MockOrderRepo)
+		service := NewService(mockRepo)
 		mockRepo.On("List", ctx, filter).Return([]Order{{Status: "pending"}}, int64(5), nil)
 		resp, err := service.ListOrders(ctx, filter)
 		assert.NoError(t, err)
@@ -36,6 +36,8 @@ func TestOrderService_ListOrders(t *testing.T) {
 	})
 
 	t.Run("Error", func(t *testing.T) {
+		mockRepo := new(MockOrderRepo)
+		service := NewService(mockRepo)
 		mockRepo.On("List", ctx, filter).Return([]Order(nil), int64(0), errors.New("db error"))
 		resp, err := service.ListOrders(ctx, filter)
 		assert.Error(t, err)

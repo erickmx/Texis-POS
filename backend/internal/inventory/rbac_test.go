@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/erickmx/texis-pos/internal/auth"
+	"github.com/erickmx/texis-pos/internal/inventory/validation"
 	"github.com/gofiber/fiber/v3"
 	"github.com/stretchr/testify/assert"
 )
@@ -28,8 +29,13 @@ func TestInventoryRBAC(t *testing.T) {
 	handler.RegisterRoutes(app)
 
 	t.Run("GET /api/products/ - Public Access", func(t *testing.T) {
-		mockRepo.On("GetAll", context.Background()).Return([]Product{}, nil)
-		
+		mockRepo.On("GetAllFiltered", context.Background(), validation.ProductFilter{
+			Page:      1,
+			Limit:     20,
+			SortBy:    "created_at",
+			SortOrder: "desc",
+		}).Return([]Product{}, int64(0), nil)
+
 		req := httptest.NewRequest("GET", "/api/products/", nil)
 		resp, _ := app.Test(req)
 		assert.Equal(t, 200, resp.StatusCode)

@@ -127,11 +127,11 @@ func TestInventoryService_Delete(t *testing.T) {
 }
 
 func TestInventoryService_GetTotal(t *testing.T) {
-	mockRepo := new(MockRepo)
-	service := NewService(mockRepo, nil)
 	ctx := context.Background()
 
 	t.Run("Success", func(t *testing.T) {
+		mockRepo := new(MockRepo)
+		service := NewService(mockRepo, nil)
 		mockRepo.On("GetTotal", ctx).Return(int64(42), nil)
 		total, err := service.GetTotal(ctx)
 		assert.NoError(t, err)
@@ -140,6 +140,8 @@ func TestInventoryService_GetTotal(t *testing.T) {
 	})
 
 	t.Run("Error", func(t *testing.T) {
+		mockRepo := new(MockRepo)
+		service := NewService(mockRepo, nil)
 		mockRepo.On("GetTotal", ctx).Return(int64(0), errors.New("db error"))
 		total, err := service.GetTotal(ctx)
 		assert.Error(t, err)
@@ -148,11 +150,11 @@ func TestInventoryService_GetTotal(t *testing.T) {
 }
 
 func TestInventoryService_GetLowStock(t *testing.T) {
-	mockRepo := new(MockRepo)
-	service := NewService(mockRepo, nil)
 	ctx := context.Background()
 
 	t.Run("Success", func(t *testing.T) {
+		mockRepo := new(MockRepo)
+		service := NewService(mockRepo, nil)
 		mockRepo.On("GetLowStock", ctx).Return([]Product{{Title: "Low"}}, nil)
 		products, err := service.GetLowStock(ctx)
 		assert.NoError(t, err)
@@ -161,6 +163,8 @@ func TestInventoryService_GetLowStock(t *testing.T) {
 	})
 
 	t.Run("Error", func(t *testing.T) {
+		mockRepo := new(MockRepo)
+		service := NewService(mockRepo, nil)
 		mockRepo.On("GetLowStock", ctx).Return([]Product(nil), errors.New("db error"))
 		products, err := service.GetLowStock(ctx)
 		assert.Error(t, err)
@@ -169,12 +173,12 @@ func TestInventoryService_GetLowStock(t *testing.T) {
 }
 
 func TestInventoryService_GetAllFiltered(t *testing.T) {
-	mockRepo := new(MockRepo)
-	service := NewService(mockRepo, nil)
 	ctx := context.Background()
 	filter := validation.ProductFilter{Page: 2, Limit: 10, SortBy: "created_at", SortOrder: "desc"}
 
 	t.Run("Success with meta", func(t *testing.T) {
+		mockRepo := new(MockRepo)
+		service := NewService(mockRepo, nil)
 		mockRepo.On("GetAllFiltered", ctx, filter).Return([]Product{{Title: "A"}}, int64(25), nil)
 		resp, err := service.GetAllFiltered(ctx, filter)
 		assert.NoError(t, err)
@@ -187,6 +191,8 @@ func TestInventoryService_GetAllFiltered(t *testing.T) {
 	})
 
 	t.Run("Error", func(t *testing.T) {
+		mockRepo := new(MockRepo)
+		service := NewService(mockRepo, nil)
 		mockRepo.On("GetAllFiltered", ctx, filter).Return([]Product(nil), int64(0), errors.New("db error"))
 		resp, err := service.GetAllFiltered(ctx, filter)
 		assert.Error(t, err)

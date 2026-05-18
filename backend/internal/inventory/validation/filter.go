@@ -28,12 +28,12 @@ func ParseProductFilter(values map[string]string) ProductFilter {
 		SortBy:    "created_at",
 		SortOrder: "desc",
 	}
-	if p, ok := values["page"]; ok {
+	if p, ok := values["page"]; ok && p != "" {
 		if n, err := strconv.Atoi(p); err == nil {
 			f.Page = n
 		}
 	}
-	if l, ok := values["limit"]; ok {
+	if l, ok := values["limit"]; ok && l != "" {
 		if n, err := strconv.Atoi(l); err == nil {
 			f.Limit = n
 		}
@@ -41,10 +41,10 @@ func ParseProductFilter(values map[string]string) ProductFilter {
 	if s, ok := values["search"]; ok {
 		f.Search = strings.TrimSpace(s)
 	}
-	if s, ok := values["sort_by"]; ok {
+	if s, ok := values["sort_by"]; ok && s != "" {
 		f.SortBy = strings.TrimSpace(s)
 	}
-	if s, ok := values["sort_order"]; ok {
+	if s, ok := values["sort_order"]; ok && s != "" {
 		f.SortOrder = strings.ToLower(strings.TrimSpace(s))
 	}
 	return f
