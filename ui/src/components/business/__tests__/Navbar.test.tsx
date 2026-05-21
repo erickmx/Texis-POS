@@ -13,6 +13,14 @@ jest.mock('react-i18next', () => ({
   }),
 }));
 
+// Mock next/navigation
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    refresh: jest.fn(),
+  }),
+}));
+
 const renderWithProvider = (ui: React.ReactElement) => {
   return render(<InventoryModalProvider>{ui}</InventoryModalProvider>);
 };

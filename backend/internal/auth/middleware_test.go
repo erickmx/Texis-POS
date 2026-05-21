@@ -19,8 +19,8 @@ func TestMiddleware(t *testing.T) {
 
 	svc := NewService(jwtSecret, adminUser, adminPass, sellerUser, sellerPass)
 	
-	adminToken, _ := svc.Login(context.Background(), adminUser, adminPass)
-	sellerToken, _ := svc.Login(context.Background(), sellerUser, sellerPass)
+	adminToken, _ := svc.Login(context.Background(), adminUser, adminPass, "", "")
+	sellerToken, _ := svc.Login(context.Background(), sellerUser, sellerPass, "", "")
 
 	app := fiber.New()
 	
