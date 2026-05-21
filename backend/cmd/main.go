@@ -91,6 +91,7 @@ func main() {
 
 	// 7. Register Routes
 	app.Post("/api/login", authHandler.Login)
+	app.Post("/api/refresh", authHandler.Refresh)
 	storageHandler.RegisterRoutes(app)
 	inventoryHandler.RegisterRoutes(app)
 	orderHandler.RegisterRoutes(app)

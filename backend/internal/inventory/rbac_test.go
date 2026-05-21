@@ -16,8 +16,8 @@ func TestInventoryRBAC(t *testing.T) {
 	// Setup Auth
 	jwtSecret := "test-secret"
 	authSvc := auth.NewService(jwtSecret, "admin", "admin123", "seller", "seller123")
-	adminToken, _ := authSvc.Login(context.Background(), "admin", "admin123")
-	sellerToken, _ := authSvc.Login(context.Background(), "seller", "seller123")
+	adminToken, _ := authSvc.Login(context.Background(), "admin", "admin123", "", "")
+	sellerToken, _ := authSvc.Login(context.Background(), "seller", "seller123", "", "")
 
 	// Setup Mocks
 	mockRepo := new(MockRepo)

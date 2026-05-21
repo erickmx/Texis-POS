@@ -87,5 +87,24 @@
         "image_type": "Solo se aceptan imágenes JPEG, PNG y WebP"
       }
     }
+  },
+  "auth": {
+    "login_title": "Iniciar Sesión en Texis POS",
+    "email_label": "Usuario o Correo Electrónico",
+    "email_placeholder": "usuario o correo",
+    "password_label": "Contraseña",
+    "password_placeholder": "••••••••",
+    "show_password": "Mostrar contraseña",
+    "submit_button": "Iniciar Sesión",
+    "signing_in": "Iniciando Sesión...",
+    "error_title": "Error de Autenticación",
+    "error_invalid_credentials": "El usuario/correo o la contraseña ingresados son incorrectos.",
+    "error_ip_blocked": "Demasiados intentos fallidos. Intente de nuevo en {{minutes}}m {{seconds}}s.",
+    "error_session_expired": "Su sesión ha expirado. Por favor, inicie sesión de nuevo.",
+    "validation": {
+      "email_required": "El usuario o correo electrónico es obligatorio",
+      "invalid_email": "Por favor ingrese un correo electrónico válido",
+      "password_required": "La contraseña es obligatoria"
+    }
   }
 }
