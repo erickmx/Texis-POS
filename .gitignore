@@ -78,3 +78,5 @@ desktop/src-tauri/**/*.exe
 # ==========================================
 coverage/
 .nyc_output/
+# Local Pi runtime state
+.atl/
