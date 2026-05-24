@@ -22,7 +22,7 @@ func TestInventoryRBAC(t *testing.T) {
 	// Setup Mocks
 	mockRepo := new(MockRepo)
 	mockStorage := new(MockStorage)
-	service := NewService(mockRepo, mockStorage)
+	service := NewService(mockRepo, mockStorage, nil)
 	handler := NewHandler(service, authSvc)
 
 	app := fiber.New()

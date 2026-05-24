@@ -138,3 +138,50 @@ func (r *SupabaseProductRepository) GetAllFiltered(ctx context.Context, filter v
 
 	return products, count, nil
 }
+
+func (r *SupabaseProductRepository) SetProductCategories(ctx context.Context, productID string, categoryIDs []string) error {
+	// Delete existing associations
+	_, _, err := r.client.From("product_categories").Delete("", "").Eq("product_id", productID).Execute()
+	if err != nil {
+		return fmt.Errorf("failed to clear product categories: %w", err)
+	}
+
+	if len(categoryIDs) == 0 {
+		return nil
+	}
+
+	// Insert new associations
+	rows := make([]map[string]interface{}, len(categoryIDs))
+	for i, cid := range categoryIDs {
+		rows[i] = map[string]interface{}{
+			"product_id":  productID,
+			"category_id": cid,
+		}
+	}
+	_, _, err = r.client.From("product_categories").Insert(rows, false, "", "", "").Execute()
+	if err != nil {
+		return fmt.Errorf("failed to set product categories: %w", err)
+	}
+	return nil
+}
+
+func (r *SupabaseProductRepository) GetProductCategories(ctx context.Context, productID string) ([]string, error) {
+	data, _, err := r.client.From("product_categories").
+		Select("category_id", "exact", false).
+		Eq("product_id", productID).
+		Execute()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get product categories: %w", err)
+	}
+	var rows []struct {
+		CategoryID string `json:"category_id"`
+	}
+	if err := json.Unmarshal([]byte(data), &rows); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal product categories: %w", err)
+	}
+	ids := make([]string, len(rows))
+	for i, row := range rows {
+		ids[i] = row.CategoryID
+	}
+	return ids, nil
+}
