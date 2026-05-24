@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useCallback } from 'react';
-import toast from 'react-hot-toast';
 import { useTranslation } from '@/i18n/client';
 import { useInventoryModal } from '../providers/InventoryModalProvider';
 import { Modal } from '../ui/Modal';
 import { ProductForm } from './ProductForm';
-import { ProductFormData } from '@/lib/validations/product';
+import { useProduct } from '@/lib/api/hooks/useProduct';
+import { useSWRConfig } from 'swr';
 
 interface ProductModalProps {
   lng: string;
@@ -15,35 +15,20 @@ interface ProductModalProps {
 export const ProductModal: React.FC<ProductModalProps> = ({ lng }) => {
   const { isOpen, mode, product, close } = useInventoryModal();
   const { t } = useTranslation(lng, 'common');
+  const { mutate } = useSWRConfig();
 
-  const handleSubmit = useCallback(
-    async (data: ProductFormData) => {
-      // Mock API call
-      return new Promise<void>((resolve, reject) => {
-        setTimeout(() => {
-          // Simulate 90% success rate for demo
-          if (Math.random() > 0.1) {
-            resolve();
-          } else {
-            reject(new Error('Mock API error'));
-          }
-        }, 800);
-      })
-        .then(() => {
-          toast.success(
-            mode === 'create'
-              ? t('inventory.modal.success_create')
-              : t('inventory.modal.success_edit'),
-            { duration: 3000 }
-          );
-          close();
-        })
-        .catch(() => {
-          toast.error(t('inventory.modal.error_generic'), { duration: 4000 });
-        });
-    },
-    [mode, t, close]
-  );
+  const productId = mode === 'edit' && product ? product.id : null;
+  const { product: freshProduct, isLoading } = useProduct(productId);
+
+  const handleSuccess = useCallback(() => {
+    // Filter-based mutate matches all keys starting with 'products'
+    // because paginated keys are ['products', { page, limit }]
+    mutate(
+      (key) => Array.isArray(key) && typeof key[0] === 'string' && key[0] === 'products'
+    );
+    mutate(['products/total']);
+    mutate(['products/stock/low']);
+  }, [mutate]);
 
   const title = mode === 'create'
     ? t('inventory.modal.create_title')
@@ -51,15 +36,23 @@ export const ProductModal: React.FC<ProductModalProps> = ({ lng }) => {
 
   const subtitle = t('inventory.modal.subtitle');
 
+  const displayProduct = mode === 'edit' && freshProduct ? freshProduct : product;
+
   return (
     <Modal isOpen={isOpen} onClose={close} title={title} subtitle={subtitle}>
-      <ProductForm
-        mode={mode}
-        initialData={product}
-        onSubmit={handleSubmit}
-        onCancel={close}
-        lng={lng}
-      />
+      {mode === 'edit' && isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-container" />
+        </div>
+      ) : (
+        <ProductForm
+          mode={mode}
+          initialData={displayProduct}
+          onSuccess={handleSuccess}
+          onCancel={close}
+          lng={lng}
+        />
+      )}
     </Modal>
   );
 };

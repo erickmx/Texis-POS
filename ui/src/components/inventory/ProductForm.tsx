@@ -1,20 +1,26 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState, useRef } from 'react';
 import { useForm, Controller, Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from '@/i18n/client';
-import { productSchema, ProductFormData, CATEGORIES } from '@/lib/validations/product';
+import { productSchema, ProductFormData } from '@/lib/validations/product';
+import { uploadImage } from '@/lib/api/storage';
+import { createProduct, updateProduct } from '@/lib/api/products';
+import { getCategories } from '@/lib/api/categories';
 import { Button } from '../ui/Button';
 import { ImageDropZone } from './ImageDropZone';
 import { ModalProduct } from '../providers/InventoryModalProvider';
 import { TrendingUp } from 'lucide-react';
 import { Icon } from '../ui/Icon';
+import toast from 'react-hot-toast';
+import useSWR from 'swr';
+import { Category } from '@/lib/api/types';
 
 interface ProductFormProps {
   mode: 'create' | 'edit';
   initialData?: ModalProduct | null;
-  onSubmit: (data: ProductFormData) => Promise<void>;
+  onSuccess?: () => void;
   onCancel: () => void;
   lng: string;
 }
@@ -22,17 +28,24 @@ interface ProductFormProps {
 export const ProductForm: React.FC<ProductFormProps> = ({
   mode,
   initialData,
-  onSubmit,
+  onSuccess,
   onCancel,
   lng,
 }) => {
   const { t } = useTranslation(lng, 'common');
+  const abortRef = useRef<AbortController | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { data: categories } = useSWR<Category[]>(['categories'], () => getCategories(), {
+    revalidateOnFocus: false,
+    dedupingInterval: 60000,
+  });
 
   const defaultValues: Partial<ProductFormData> = useMemo(
     () => ({
       name: initialData?.name || '',
       description: initialData?.description || '',
-      category: initialData?.category || undefined,
+      categoryIds: initialData?.categories?.map((c) => c.id) || [],
       satCode: initialData?.satCode || '',
       buyPrice: initialData?.buyPrice || undefined,
       salePrice: initialData?.salePrice || undefined,
@@ -47,15 +60,26 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     handleSubmit,
     control,
     watch,
-    formState: { errors, isSubmitting },
+    setValue,
+    formState: { errors },
   } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema) as Resolver<ProductFormData>,
     defaultValues,
     mode: 'onBlur',
   });
 
+  useEffect(() => {
+    const controller = new AbortController();
+    abortRef.current = controller;
+    return () => {
+      controller.abort();
+      abortRef.current = null;
+    };
+  }, []);
+
   const buyPrice = watch('buyPrice');
   const salePrice = watch('salePrice');
+  const selectedCategoryIds = watch('categoryIds') || [];
 
   const profitMargin = useMemo(() => {
     const buy = Number(buyPrice);
@@ -69,6 +93,60 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const getErrorMessage = (errorKey?: string): string | undefined => {
     if (!errorKey) return undefined;
     return t(errorKey);
+  };
+
+  const toggleCategory = (id: string) => {
+    const current = selectedCategoryIds;
+    if (current.includes(id)) {
+      setValue('categoryIds', current.filter((c) => c !== id));
+    } else {
+      setValue('categoryIds', [...current, id]);
+    }
+  };
+
+  const onSubmit = async (data: ProductFormData) => {
+    const signal = abortRef.current?.signal;
+    setIsSubmitting(true);
+
+    try {
+      let imageUrl: string | undefined;
+      if (data.image instanceof File) {
+        imageUrl = await uploadImage(data.image, signal);
+      } else if (typeof data.image === 'string') {
+        imageUrl = data.image;
+      }
+
+      const dto = {
+        name: data.name,
+        description: data.description,
+        sku: '',
+        satCode: data.satCode || '',
+        buyPrice: data.buyPrice,
+        salePrice: data.salePrice,
+        stockLevel: data.stock,
+        image: imageUrl,
+        categoryIds: data.categoryIds,
+      };
+
+      if (mode === 'create') {
+        await createProduct(dto, signal);
+        toast.success(t('inventory.modal.success_create'), { duration: 3000 });
+      } else if (initialData?.id) {
+        await updateProduct(initialData.id, dto, signal);
+        toast.success(t('inventory.modal.success_edit'), { duration: 3000 });
+      }
+
+      onSuccess?.();
+      onCancel();
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        return;
+      }
+      const message = err instanceof Error ? err.message : t('inventory.modal.error_generic');
+      toast.error(message, { duration: 4000 });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -124,30 +202,30 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         />
       </div>
 
-      {/* Category + SAT Fiscal Code - 2 columns */}
+      {/* Category Multi-Select + SAT Fiscal Code - 2 columns */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="category" className="text-sm font-medium text-on-surface-variant">
+          <label className="text-sm font-medium text-on-surface-variant">
             {t('inventory.modal.category')}
           </label>
-          <select
-            id="category"
-            className={`w-full bg-surface-container-lowest border rounded-xl px-4 py-3 text-sm outline-none transition-all ${
-              errors.category
-                ? 'border-[#e53935] focus:border-[#e53935] focus:ring-2 focus:ring-[#e53935]/10'
-                : 'border-outline-variant/15 focus:border-primary-container focus:ring-2 focus:ring-primary-container/10'
-            }`}
-            {...register('category')}
-          >
-            <option value="">{t('inventory.modal.category_placeholder')}</option>
-            {CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>
-                {t(`inventory.categories.${cat}`)}
-              </option>
+          <div className="flex flex-wrap gap-2">
+            {categories?.map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => toggleCategory(cat.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  selectedCategoryIds.includes(cat.id)
+                    ? 'bg-primary-container text-white'
+                    : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container'
+                }`}
+              >
+                {cat.name}
+              </button>
             ))}
-          </select>
-          {errors.category && (
-            <p className="text-xs text-[#e53935] font-medium">{getErrorMessage(errors.category.message)}</p>
+          </div>
+          {errors.categoryIds && (
+            <p className="text-xs text-[#e53935] font-medium">{getErrorMessage(errors.categoryIds.message)}</p>
           )}
         </div>
 
@@ -276,7 +354,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
       {/* Actions */}
       <div className="flex items-center justify-end gap-3 pt-2">
-        <Button type="button" variant="ghost" onClick={onCancel}>
+        <Button type="button" variant="ghost" onClick={onCancel} disabled={isSubmitting}>
           {t('inventory.modal.cancel')}
         </Button>
         <Button
@@ -285,11 +363,17 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           disabled={isSubmitting}
           className={isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}
         >
-          {isSubmitting
-            ? '...'
-            : mode === 'create'
-            ? t('inventory.modal.save')
-            : t('inventory.modal.save')}
+          {isSubmitting ? (
+            <span className="flex items-center gap-2">
+              <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {t('inventory.modal.saving')}
+            </span>
+          ) : (
+            t('inventory.modal.save')
+          )}
         </Button>
       </div>
     </form>

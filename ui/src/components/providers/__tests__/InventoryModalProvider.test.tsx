@@ -9,7 +9,7 @@ const TestComponent = () => {
       <span data-testid="mode">{mode}</span>
       <span data-testid="product">{product ? product.name : 'none'}</span>
       <button onClick={openCreate}>Open Create</button>
-      <button onClick={() => openEdit({ name: 'Test Product', category: 'notebooks', buyPrice: 10, salePrice: 20, stockLevel: 5 })}>
+      <button onClick={() => openEdit({ id: '1', name: 'Test Product', buyPrice: 10, salePrice: 20, stockLevel: 5, isDeleted: false, createdAt: '2024-01-01T00:00:00Z', satCode: '' })}>
         Open Edit
       </button>
       <button onClick={close}>Close</button>

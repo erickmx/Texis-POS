@@ -1,33 +1,21 @@
+'use client';
+
 import React from 'react';
 import { Badge } from '../ui/Badge';
 import { Icon } from '../ui/Icon';
 import { Card } from '../ui/Card';
-
-import { useTranslation } from '@/i18n/server';
+import { useTranslation } from '@/i18n/client';
 import { formatCurrency } from '@/lib/format';
 import { EditProductButton } from './EditProductButton';
-import { Category } from '@/lib/validations/product';
-
-export interface Product {
-  id: string;
-  name: string;
-  sku: string;
-  description: string;
-  stockLevel: number;
-  buyPrice: number;
-  salePrice: number;
-  image: string;
-  category: Category;
-  satCode?: string;
-}
+import { Product } from '@/lib/api/types';
 
 interface ProductTableProps {
   products: Product[];
   lng: string;
 }
 
-export const ProductTable = async ({ products, lng }: ProductTableProps) => {
-  const { t } = await useTranslation(lng, 'common');
+export const ProductTable: React.FC<ProductTableProps> = ({ products, lng }) => {
+  const { t } = useTranslation(lng, 'common');
 
   const getStockStatus = (level: number) => {
     if (level <= 0) return { label: t('inventory.table.out_of_stock'), variant: 'outline' as const };
@@ -59,10 +47,13 @@ export const ProductTable = async ({ products, lng }: ProductTableProps) => {
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-sm bg-surface-container overflow-hidden flex-shrink-0">
-                        {/* Placeholder for real images */}
-                        <div className="w-full h-full bg-surface-container-high flex items-center justify-center text-[10px] text-on-surface-variant/40">
-                          {product.name.charAt(0)}
-                        </div>
+                        {product.image ? (
+                          <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-surface-container-high flex items-center justify-center text-[10px] text-on-surface-variant/40">
+                            {product.name.charAt(0)}
+                          </div>
+                        )}
                       </div>
                       <div>
                         <p className="font-display font-bold text-on-surface text-sm">{product.name}</p>
@@ -72,7 +63,7 @@ export const ProductTable = async ({ products, lng }: ProductTableProps) => {
                   </td>
                   <td className="px-6 py-5">
                     <span className="bg-[#f0f2f5] text-on-surface-variant/70 px-2 py-0.5 rounded-sm text-[9px] font-bold tracking-widest font-mono uppercase">
-                      {product.sku}
+                      {product.sku || '-'}
                     </span>
                   </td>
                   <td className="px-6 py-5">
@@ -82,9 +73,9 @@ export const ProductTable = async ({ products, lng }: ProductTableProps) => {
                         <Badge variant={status.variant}>{status.label}</Badge>
                       </div>
                       <div className="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
-                        <div 
+                        <div
                           className={`h-full rounded-full transition-all duration-500 ${
-                            status.variant === 'primary' ? 'bg-primary-container' : 
+                            status.variant === 'primary' ? 'bg-primary-container' :
                             status.variant === 'secondary' ? 'bg-secondary-container' : 'bg-[#e53935]'
                           }`}
                           style={{ width: `${stockPercentage}%` }}
@@ -99,19 +90,7 @@ export const ProductTable = async ({ products, lng }: ProductTableProps) => {
                     {formatCurrency(product.salePrice)}
                   </td>
                   <td className="px-6 py-5 text-right">
-                    <EditProductButton
-                      product={{
-                        id: product.id,
-                        name: product.name,
-                        description: product.description,
-                        category: product.category,
-                        satCode: product.satCode,
-                        buyPrice: product.buyPrice,
-                        salePrice: product.salePrice,
-                        stockLevel: product.stockLevel,
-                        image: product.image,
-                      }}
-                    />
+                    <EditProductButton product={product} />
                   </td>
                 </tr>
               );
@@ -119,13 +98,12 @@ export const ProductTable = async ({ products, lng }: ProductTableProps) => {
           </tbody>
         </table>
       </div>
-      
+
       {/* Pagination Placeholder */}
       <div className="px-6 py-4 border-t border-solid border-outline-variant bg-surface-container-lowest flex items-center justify-between">
         <p className="text-xs text-on-surface-variant/60">
           {t('inventory.table.showing', { start: 1, end: products.length, total: products.length })}
         </p>
-...
         <div className="flex gap-2">
           <button className="w-8 h-8 rounded-sm border border-solid border-outline-variant flex items-center justify-center text-xs text-on-surface-variant hover:bg-surface-container-low transition-colors">&lt;</button>
           <button className="w-8 h-8 rounded-sm bg-primary-container text-white flex items-center justify-center text-xs font-bold">1</button>

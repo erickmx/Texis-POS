@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/erickmx/texis-pos/internal/category"
 	"github.com/erickmx/texis-pos/internal/inventory/validation"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -64,6 +65,16 @@ func (m *MockRepo) GetAllFiltered(ctx context.Context, filter validation.Product
 	return args.Get(0).([]Product), args.Get(1).(int64), args.Error(2)
 }
 
+func (m *MockRepo) SetProductCategories(ctx context.Context, productID string, categoryIDs []string) error {
+	args := m.Called(ctx, productID, categoryIDs)
+	return args.Error(0)
+}
+
+func (m *MockRepo) GetProductCategories(ctx context.Context, productID string) ([]string, error) {
+	args := m.Called(ctx, productID)
+	return args.Get(0).([]string), args.Error(1)
+}
+
 // MockStorage is a mock of the StorageService interface.
 type MockStorage struct {
 	mock.Mock
@@ -74,10 +85,24 @@ func (m *MockStorage) Exists(ctx context.Context, imagePath string) (bool, error
 	return args.Bool(0), args.Error(1)
 }
 
+// MockCategoryRepo is a mock of the CategoryRepository interface.
+type MockCategoryRepo struct {
+	mock.Mock
+}
+
+func (m *MockCategoryRepo) GetByProductID(ctx context.Context, productID string) ([]category.Category, error) {
+	args := m.Called(ctx, productID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]category.Category), args.Error(1)
+}
+
 func TestInventoryService_Create(t *testing.T) {
 	mockRepo := new(MockRepo)
 	mockStorage := new(MockStorage)
-	service := NewService(mockRepo, mockStorage)
+	mockCatRepo := new(MockCategoryRepo)
+	service := NewService(mockRepo, mockStorage, mockCatRepo)
 	ctx := context.Background()
 
 	t.Run("Success - No Image", func(t *testing.T) {
@@ -115,7 +140,8 @@ func TestInventoryService_Create(t *testing.T) {
 func TestInventoryService_Delete(t *testing.T) {
 	mockRepo := new(MockRepo)
 	mockStorage := new(MockStorage)
-	service := NewService(mockRepo, mockStorage)
+	mockCatRepo := new(MockCategoryRepo)
+	service := NewService(mockRepo, mockStorage, mockCatRepo)
 	ctx := context.Background()
 
 	t.Run("Success", func(t *testing.T) {
@@ -131,7 +157,7 @@ func TestInventoryService_GetTotal(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		mockRepo := new(MockRepo)
-		service := NewService(mockRepo, nil)
+		service := NewService(mockRepo, nil, nil)
 		mockRepo.On("GetTotal", ctx).Return(int64(42), nil)
 		total, err := service.GetTotal(ctx)
 		assert.NoError(t, err)
@@ -141,7 +167,7 @@ func TestInventoryService_GetTotal(t *testing.T) {
 
 	t.Run("Error", func(t *testing.T) {
 		mockRepo := new(MockRepo)
-		service := NewService(mockRepo, nil)
+		service := NewService(mockRepo, nil, nil)
 		mockRepo.On("GetTotal", ctx).Return(int64(0), errors.New("db error"))
 		total, err := service.GetTotal(ctx)
 		assert.Error(t, err)
@@ -154,7 +180,7 @@ func TestInventoryService_GetLowStock(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		mockRepo := new(MockRepo)
-		service := NewService(mockRepo, nil)
+		service := NewService(mockRepo, nil, nil)
 		mockRepo.On("GetLowStock", ctx).Return([]Product{{Title: "Low"}}, nil)
 		products, err := service.GetLowStock(ctx)
 		assert.NoError(t, err)
@@ -164,7 +190,7 @@ func TestInventoryService_GetLowStock(t *testing.T) {
 
 	t.Run("Error", func(t *testing.T) {
 		mockRepo := new(MockRepo)
-		service := NewService(mockRepo, nil)
+		service := NewService(mockRepo, nil, nil)
 		mockRepo.On("GetLowStock", ctx).Return([]Product(nil), errors.New("db error"))
 		products, err := service.GetLowStock(ctx)
 		assert.Error(t, err)
@@ -178,7 +204,7 @@ func TestInventoryService_GetAllFiltered(t *testing.T) {
 
 	t.Run("Success with meta", func(t *testing.T) {
 		mockRepo := new(MockRepo)
-		service := NewService(mockRepo, nil)
+		service := NewService(mockRepo, nil, nil)
 		mockRepo.On("GetAllFiltered", ctx, filter).Return([]Product{{Title: "A"}}, int64(25), nil)
 		resp, err := service.GetAllFiltered(ctx, filter)
 		assert.NoError(t, err)
@@ -192,7 +218,7 @@ func TestInventoryService_GetAllFiltered(t *testing.T) {
 
 	t.Run("Error", func(t *testing.T) {
 		mockRepo := new(MockRepo)
-		service := NewService(mockRepo, nil)
+		service := NewService(mockRepo, nil, nil)
 		mockRepo.On("GetAllFiltered", ctx, filter).Return([]Product(nil), int64(0), errors.New("db error"))
 		resp, err := service.GetAllFiltered(ctx, filter)
 		assert.Error(t, err)

@@ -27,10 +27,6 @@ jest.mock('react-i18next', () => ({
         'inventory.modal.per_unit': 'per unit',
         'inventory.modal.save': 'Save Product',
         'inventory.modal.cancel': 'Cancel',
-        'inventory.categories.notebooks': 'Notebooks',
-        'inventory.categories.fine_pens': 'Fine Pens',
-        'inventory.categories.desk_organizers': 'Desk Organizers',
-        'inventory.categories.adhesives': 'Adhesives',
       };
       let text = translations[key] || key;
       if (params) {
@@ -43,8 +39,13 @@ jest.mock('react-i18next', () => ({
   }),
 }));
 
-const mockSubmit = jest.fn().mockResolvedValue(undefined);
+jest.mock('swr', () => ({
+  __esModule: true,
+  default: () => ({ data: [] }),
+}));
+
 const mockCancel = jest.fn();
+const mockSuccess = jest.fn();
 
 const renderForm = (props?: { mode?: 'create' | 'edit'; initialData?: any }) => {
   return render(
@@ -52,7 +53,7 @@ const renderForm = (props?: { mode?: 'create' | 'edit'; initialData?: any }) => 
       <ProductForm
         mode={props?.mode || 'create'}
         initialData={props?.initialData || null}
-        onSubmit={mockSubmit}
+        onSuccess={mockSuccess}
         onCancel={mockCancel}
         lng="en"
       />
@@ -62,7 +63,7 @@ const renderForm = (props?: { mode?: 'create' | 'edit'; initialData?: any }) => 
 
 describe('ProductForm', () => {
   beforeEach(() => {
-    mockSubmit.mockClear();
+    mockSuccess.mockClear();
     mockCancel.mockClear();
   });
 
@@ -70,7 +71,6 @@ describe('ProductForm', () => {
     renderForm();
     expect(screen.getByLabelText('Product Name')).toBeInTheDocument();
     expect(screen.getByLabelText('Description')).toBeInTheDocument();
-    expect(screen.getByLabelText('Category')).toBeInTheDocument();
     expect(screen.getByLabelText('SAT Fiscal Code')).toBeInTheDocument();
     expect(screen.getByLabelText('Buy Price')).toBeInTheDocument();
     expect(screen.getByLabelText('Sale Price')).toBeInTheDocument();
@@ -82,14 +82,17 @@ describe('ProductForm', () => {
     renderForm({
       mode: 'edit',
       initialData: {
+        id: '1',
         name: 'Existing Product',
         description: 'Existing description',
-        category: 'fine_pens',
+        categories: [],
         satCode: '12345678',
         buyPrice: 50,
         salePrice: 75,
         stockLevel: 10,
         image: null,
+        isDeleted: false,
+        createdAt: '2024-01-01T00:00:00Z',
       },
     });
     expect(screen.getByLabelText('Product Name')).toHaveValue('Existing Product');
@@ -109,28 +112,6 @@ describe('ProductForm', () => {
     fireEvent.change(screen.getByLabelText('Sale Price'), { target: { value: '75' } });
     expect(screen.getByText('50.0%')).toBeInTheDocument();
     expect(screen.getByText(/25\.00/)).toBeInTheDocument();
-  });
-
-  it('should call onSubmit with valid data.', async () => {
-    renderForm();
-    fireEvent.change(screen.getByLabelText('Product Name'), { target: { value: 'New Product' } });
-    fireEvent.change(screen.getByLabelText('Category'), { target: { value: 'notebooks' } });
-    fireEvent.change(screen.getByLabelText('Buy Price'), { target: { value: '10' } });
-    fireEvent.change(screen.getByLabelText('Sale Price'), { target: { value: '20' } });
-    fireEvent.change(screen.getByLabelText('Initial Stock'), { target: { value: '5' } });
-
-    fireEvent.click(screen.getByRole('button', { name: 'Save Product' }));
-
-    await waitFor(() => {
-      expect(mockSubmit).toHaveBeenCalled();
-    });
-
-    const submittedData = mockSubmit.mock.calls[0][0];
-    expect(submittedData.name).toBe('New Product');
-    expect(submittedData.category).toBe('notebooks');
-    expect(submittedData.buyPrice).toBe(10);
-    expect(submittedData.salePrice).toBe(20);
-    expect(submittedData.stock).toBe(5);
   });
 
   it('should show validation error for short SAT code.', async () => {

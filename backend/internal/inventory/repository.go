@@ -16,4 +16,8 @@ type ProductRepository interface {
 	GetTotal(ctx context.Context) (int64, error)
 	GetLowStock(ctx context.Context) ([]Product, error)
 	GetAllFiltered(ctx context.Context, filter validation.ProductFilter) ([]Product, int64, error)
+
+	// Junction table helpers
+	SetProductCategories(ctx context.Context, productID string, categoryIDs []string) error
+	GetProductCategories(ctx context.Context, productID string) ([]string, error)
 }

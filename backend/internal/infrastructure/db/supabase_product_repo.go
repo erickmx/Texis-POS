@@ -47,7 +47,9 @@ func (r *SupabaseProductRepository) GetByID(ctx context.Context, id string) (*in
 }
 
 func (r *SupabaseProductRepository) Create(ctx context.Context, product interface{}) (*inventory.Product, error) {
-	data, _, err := r.client.From("products").Insert(product, false, "", "", "").Execute()
+	// Strip category_ids from DTO since it's not a column in the products table
+	clean := stripCategoryIDs(product)
+	data, _, err := r.client.From("products").Insert(clean, false, "", "", "").Execute()
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +64,8 @@ func (r *SupabaseProductRepository) Create(ctx context.Context, product interfac
 }
 
 func (r *SupabaseProductRepository) Update(ctx context.Context, id string, product interface{}) (*inventory.Product, error) {
-	data, _, err := r.client.From("products").Update(product, "", "").Eq("id", id).Execute()
+	clean := stripCategoryIDs(product)
+	data, _, err := r.client.From("products").Update(clean, "", "").Eq("id", id).Execute()
 	if err != nil {
 		return nil, err
 	}
@@ -98,17 +101,23 @@ func (r *SupabaseProductRepository) GetTotal(ctx context.Context) (int64, error)
 func (r *SupabaseProductRepository) GetLowStock(ctx context.Context) ([]inventory.Product, error) {
 	data, _, err := r.client.From("products").
 		Select("*", "exact", false).
-		Lt("stock_level", "reorder_point").
 		Eq("is_deleted", "false").
 		Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get low stock products: %w", err)
 	}
-	var products []inventory.Product
-	if err := json.Unmarshal([]byte(data), &products); err != nil {
+	var all []inventory.Product
+	if err := json.Unmarshal([]byte(data), &all); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal low stock products: %w", err)
 	}
-	return products, nil
+	// Filter in Go: PostgREST does not support column-to-column comparison
+	var lowStock []inventory.Product
+	for _, p := range all {
+		if p.StockLevel < p.ReorderPoint {
+			lowStock = append(lowStock, p)
+		}
+	}
+	return lowStock, nil
 }
 
 func (r *SupabaseProductRepository) GetAllFiltered(ctx context.Context, filter validation.ProductFilter) ([]inventory.Product, int64, error) {
@@ -137,4 +146,61 @@ func (r *SupabaseProductRepository) GetAllFiltered(ctx context.Context, filter v
 	}
 
 	return products, count, nil
+}
+
+func (r *SupabaseProductRepository) SetProductCategories(ctx context.Context, productID string, categoryIDs []string) error {
+	// Delete existing associations
+	_, _, err := r.client.From("product_categories").Delete("", "").Eq("product_id", productID).Execute()
+	if err != nil {
+		return fmt.Errorf("failed to clear product categories: %w", err)
+	}
+
+	if len(categoryIDs) == 0 {
+		return nil
+	}
+
+	// Insert new associations
+	rows := make([]map[string]interface{}, len(categoryIDs))
+	for i, cid := range categoryIDs {
+		rows[i] = map[string]interface{}{
+			"product_id":  productID,
+			"category_id": cid,
+		}
+	}
+	_, _, err = r.client.From("product_categories").Insert(rows, false, "", "", "").Execute()
+	if err != nil {
+		return fmt.Errorf("failed to set product categories: %w", err)
+	}
+	return nil
+}
+
+func (r *SupabaseProductRepository) GetProductCategories(ctx context.Context, productID string) ([]string, error) {
+	data, _, err := r.client.From("product_categories").
+		Select("category_id", "exact", false).
+		Eq("product_id", productID).
+		Execute()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get product categories: %w", err)
+	}
+	var rows []struct {
+		CategoryID string `json:"category_id"`
+	}
+	if err := json.Unmarshal([]byte(data), &rows); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal product categories: %w", err)
+	}
+	ids := make([]string, len(rows))
+	for i, row := range rows {
+		ids[i] = row.CategoryID
+	}
+	return ids, nil
+}
+
+// stripCategoryIDs removes category_ids from DTOs before sending to Supabase,
+// since it's not a column in the products table (handled via junction table).
+func stripCategoryIDs(product interface{}) map[string]interface{} {
+	raw, _ := json.Marshal(product)
+	var m map[string]interface{}
+	json.Unmarshal(raw, &m)
+	delete(m, "category_ids")
+	return m
 }

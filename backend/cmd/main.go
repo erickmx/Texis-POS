@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/erickmx/texis-pos/internal/auth"
+	"github.com/erickmx/texis-pos/internal/category"
 	"github.com/erickmx/texis-pos/internal/infrastructure/db"
 	storageInfra "github.com/erickmx/texis-pos/internal/infrastructure/storage"
 	"github.com/erickmx/texis-pos/internal/inventory"
@@ -64,6 +65,7 @@ func main() {
 	sbClient := supabase.GetClient()
 	productRepo := db.NewSupabaseProductRepository(sbClient)
 	orderRepo := db.NewSupabaseOrderRepository(sbClient)
+	categoryRepo := category.NewSupabaseCategoryRepository(sbClient)
 	storageProvider := storageInfra.NewSupabaseStorageProvider(sbClient)
 
 	// 5. Initialize Services
@@ -80,13 +82,15 @@ func main() {
 		os.Getenv("SELLER_PASSWORD"),
 	)
 	storageSvc := storage.NewService(storageProvider)
-	inventorySvc := inventory.NewService(productRepo, storageSvc)
+	categorySvc := category.NewService(categoryRepo)
+	inventorySvc := inventory.NewService(productRepo, storageSvc, categoryRepo)
 	orderSvc := orders.NewService(orderRepo)
 
 	// 6. Initialize Handlers
 	authHandler := auth.NewHandler(authSvc)
 	storageHandler := storage.NewHandler(storageSvc, authSvc)
 	inventoryHandler := inventory.NewHandler(inventorySvc, authSvc)
+	categoryHandler := category.NewHandler(categorySvc, authSvc)
 	orderHandler := orders.NewHandler(orderSvc)
 
 	// 7. Register Routes
@@ -94,6 +98,7 @@ func main() {
 	app.Post("/api/refresh", authHandler.Refresh)
 	storageHandler.RegisterRoutes(app)
 	inventoryHandler.RegisterRoutes(app)
+	categoryHandler.RegisterRoutes(app)
 	orderHandler.RegisterRoutes(app)
 
 	// 8. Start Server

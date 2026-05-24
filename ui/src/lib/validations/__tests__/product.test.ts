@@ -1,10 +1,10 @@
-import { productSchema, CATEGORIES } from '../product';
+import { productSchema } from '../product';
 
 describe('productSchema', () => {
   const validData = {
     name: 'Artisan Notebook',
     description: 'Handcrafted binding',
-    category: 'notebooks',
+    categoryIds: ['cat-1'],
     satCode: '12345678',
     buyPrice: 12.5,
     salePrice: 24.0,
@@ -20,7 +20,6 @@ describe('productSchema', () => {
   it('should validate with optional fields omitted.', () => {
     const minimal = {
       name: 'Pen',
-      category: 'fine_pens',
       buyPrice: 10,
       salePrice: 20,
       stock: 5,
@@ -42,24 +41,14 @@ describe('productSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('should reject a missing category.', () => {
-    const result = productSchema.safeParse({ ...validData, category: undefined });
-    expect(result.success).toBe(false);
+  it('should accept optional categoryIds.', () => {
+    const result = productSchema.safeParse({ ...validData, categoryIds: undefined });
+    expect(result.success).toBe(true);
   });
 
-  it('should reject an invalid category.', () => {
-    const result = productSchema.safeParse({
-      ...validData,
-      category: 'invalid_category',
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it('should accept all valid category values.', () => {
-    CATEGORIES.forEach((cat) => {
-      const result = productSchema.safeParse({ ...validData, category: cat });
-      expect(result.success).toBe(true);
-    });
+  it('should accept empty categoryIds.', () => {
+    const result = productSchema.safeParse({ ...validData, categoryIds: [] });
+    expect(result.success).toBe(true);
   });
 
   it('should reject a SAT code with fewer than 8 digits.', () => {

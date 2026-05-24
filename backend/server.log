@@ -1,0 +1,17 @@
+2026/04/25 22:19:40 Initializing Supabase with URL: https://yhqgkyzunbolqrsrsqfx.supabase.co (using service role)
+2026/04/25 22:19:40 Server starting on port 8080
+
+ ┌───────────────────────────────────────────────────┐ 
+ │                  Fiber v2.52.13                   │ 
+ │               http://127.0.0.1:8080               │ 
+ │       (bound on host 0.0.0.0 and port 8080)       │ 
+ │                                                   │ 
+ │ Handlers ............ 14  Processes ........... 1 │ 
+ │ Prefork ....... Disabled  PID ............. 92575 │ 
+ └───────────────────────────────────────────────────┘ 
+
+22:19:41 | 201 |   564.74425ms | 127.0.0.1 | POST | /api/storage/upload | -
+22:19:42 | 201 |  355.748333ms | 127.0.0.1 | POST | /api/products | -
+22:19:42 | 403 |         8.5µs | 127.0.0.1 | POST | /api/products | -
+22:19:42 | 200 |   86.067834ms | 127.0.0.1 | GET | /api/products | -
+22:19:42 | 204 |   87.696292ms | 127.0.0.1 | DELETE | /api/products/8027c1eb-8c3b-4c17-bf77-2eec6672ab86 | -

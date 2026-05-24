@@ -12,8 +12,8 @@ import (
 )
 
 func setupInventoryTestApp(mockRepo *MockRepo) *fiber.App {
-	service := NewService(mockRepo, nil) // nil storage — not needed for GET endpoints
-	handler := NewHandler(service, nil)   // nil authService — not needed for GET endpoints
+	service := NewService(mockRepo, nil, nil) // nil storage & categoryRepo — not needed for GET endpoints
+	handler := NewHandler(service, nil)         // nil authService — not needed for GET endpoints
 	app := fiber.New()
 	handler.RegisterRoutes(app)
 	return app
