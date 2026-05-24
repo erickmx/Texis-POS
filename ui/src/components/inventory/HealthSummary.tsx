@@ -1,8 +1,10 @@
+'use client';
+
 import React from 'react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 
-import { useTranslation } from '@/i18n/server';
+import { useTranslation } from '@/i18n/client';
 
 interface HealthSummaryProps {
   optimizationScore: number;
@@ -10,12 +12,12 @@ interface HealthSummaryProps {
   lng: string;
 }
 
-export const HealthSummary = async ({ 
+export const HealthSummary: React.FC<HealthSummaryProps> = ({ 
   optimizationScore, 
   urgentItemsCount,
   lng
-}: HealthSummaryProps) => {
-  const { t } = await useTranslation(lng, 'common');
+}) => {
+  const { t } = useTranslation(lng, 'common');
   return (
     <Card className="bg-talavera relative overflow-hidden" shadow>
       {/* Decorative background pattern */}

@@ -98,17 +98,23 @@ func (r *SupabaseProductRepository) GetTotal(ctx context.Context) (int64, error)
 func (r *SupabaseProductRepository) GetLowStock(ctx context.Context) ([]inventory.Product, error) {
 	data, _, err := r.client.From("products").
 		Select("*", "exact", false).
-		Lt("stock_level", "reorder_point").
 		Eq("is_deleted", "false").
 		Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get low stock products: %w", err)
 	}
-	var products []inventory.Product
-	if err := json.Unmarshal([]byte(data), &products); err != nil {
+	var all []inventory.Product
+	if err := json.Unmarshal([]byte(data), &all); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal low stock products: %w", err)
 	}
-	return products, nil
+	// Filter in Go: PostgREST does not support column-to-column comparison
+	var lowStock []inventory.Product
+	for _, p := range all {
+		if p.StockLevel < p.ReorderPoint {
+			lowStock = append(lowStock, p)
+		}
+	}
+	return lowStock, nil
 }
 
 func (r *SupabaseProductRepository) GetAllFiltered(ctx context.Context, filter validation.ProductFilter) ([]inventory.Product, int64, error) {
