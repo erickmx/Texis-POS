@@ -1,23 +1,12 @@
 import { z } from 'zod';
 
-export const CATEGORIES = [
-  'notebooks',
-  'fine_pens',
-  'desk_organizers',
-  'adhesives',
-] as const;
-
-export type Category = (typeof CATEGORIES)[number];
-
 export const productSchema = z.object({
   name: z
     .string()
     .min(1, 'inventory.modal.errors.name_required')
     .max(120, 'inventory.modal.errors.name_max'),
   description: z.string().optional(),
-  category: z.enum(CATEGORIES, {
-    message: 'inventory.modal.errors.category_required',
-  }),
+  categoryIds: z.array(z.string()).optional(),
   satCode: z
     .string()
     .regex(/^\d{8}$/, 'inventory.modal.errors.sat_code_invalid')

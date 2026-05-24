@@ -1,9 +1,9 @@
-import { render, screen, act } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { ProductTable } from '../ProductTable';
 import { InventoryModalProvider } from '../../providers/InventoryModalProvider';
-import { Category } from '@/lib/validations/product';
+import { Product } from '@/lib/api/types';
 
-const mockProducts = [
+const mockProducts: Product[] = [
   {
     id: '1',
     name: 'Artisan Talavera Notebook',
@@ -13,20 +13,28 @@ const mockProducts = [
     buyPrice: 12.50,
     salePrice: 24.00,
     image: '/notebook.png',
-    category: 'notebooks' as Category,
+    categories: [],
     satCode: '12345678',
+    isDeleted: false,
+    createdAt: '2024-01-01T00:00:00Z',
   },
 ];
 
-// Mock server side useTranslation
-jest.mock('@/i18n/server', () => ({
-  useTranslation: () => Promise.resolve({
+jest.mock('@/i18n/client', () => ({
+  useTranslation: () => ({
     t: (key: string) => {
       const translations: Record<string, string> = {
         'inventory.table.product': 'Producto',
         'inventory.table.sku': 'SKU',
         'inventory.table.in_stock': 'EN STOCK',
         'inventory.table.units': 'Unidades',
+        'inventory.table.stock_level': 'Stock',
+        'inventory.table.buy_price': 'Buy',
+        'inventory.table.sale_price': 'Sale',
+        'inventory.table.actions': 'Actions',
+        'inventory.table.out_of_stock': 'OUT',
+        'inventory.table.low_stock': 'LOW',
+        'inventory.table.showing': 'Showing',
       };
       return translations[key] || key;
     },
@@ -34,15 +42,13 @@ jest.mock('@/i18n/server', () => ({
 }));
 
 describe('ProductTable Component', () => {
-  it('should render product name and translated labels', async () => {
-    await act(async () => {
-      render(
-        <InventoryModalProvider>
-          {await ProductTable({ products: mockProducts, lng: 'es' }) as any}
-        </InventoryModalProvider>
-      );
-    });
-    
+  it('should render product name and translated labels', () => {
+    render(
+      <InventoryModalProvider>
+        <ProductTable products={mockProducts} lng="es" />
+      </InventoryModalProvider>
+    );
+
     expect(screen.getByText('Artisan Talavera Notebook')).toBeInTheDocument();
     expect(screen.getByText('EN STOCK')).toBeInTheDocument();
     expect(screen.getByText(/42/)).toBeInTheDocument();

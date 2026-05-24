@@ -1,18 +1,9 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
+import { Product } from '@/lib/api/types';
 
-export type ModalProduct = {
-  id?: string;
-  name: string;
-  description?: string;
-  category: 'notebooks' | 'fine_pens' | 'desk_organizers' | 'adhesives';
-  satCode?: string;
-  buyPrice: number;
-  salePrice: number;
-  stockLevel: number;
-  image?: string | null;
-};
+export type ModalProduct = Product;
 
 type ModalMode = 'create' | 'edit';
 
