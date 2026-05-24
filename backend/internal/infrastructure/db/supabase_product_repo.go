@@ -47,7 +47,9 @@ func (r *SupabaseProductRepository) GetByID(ctx context.Context, id string) (*in
 }
 
 func (r *SupabaseProductRepository) Create(ctx context.Context, product interface{}) (*inventory.Product, error) {
-	data, _, err := r.client.From("products").Insert(product, false, "", "", "").Execute()
+	// Strip category_ids from DTO since it's not a column in the products table
+	clean := stripCategoryIDs(product)
+	data, _, err := r.client.From("products").Insert(clean, false, "", "", "").Execute()
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +64,8 @@ func (r *SupabaseProductRepository) Create(ctx context.Context, product interfac
 }
 
 func (r *SupabaseProductRepository) Update(ctx context.Context, id string, product interface{}) (*inventory.Product, error) {
-	data, _, err := r.client.From("products").Update(product, "", "").Eq("id", id).Execute()
+	clean := stripCategoryIDs(product)
+	data, _, err := r.client.From("products").Update(clean, "", "").Eq("id", id).Execute()
 	if err != nil {
 		return nil, err
 	}
@@ -190,4 +193,14 @@ func (r *SupabaseProductRepository) GetProductCategories(ctx context.Context, pr
 		ids[i] = row.CategoryID
 	}
 	return ids, nil
+}
+
+// stripCategoryIDs removes category_ids from DTOs before sending to Supabase,
+// since it's not a column in the products table (handled via junction table).
+func stripCategoryIDs(product interface{}) map[string]interface{} {
+	raw, _ := json.Marshal(product)
+	var m map[string]interface{}
+	json.Unmarshal(raw, &m)
+	delete(m, "category_ids")
+	return m
 }
