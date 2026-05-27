@@ -74,7 +74,7 @@ export async function middleware(req: NextRequest) {
   }
 
   // Prepare response
-  let response = NextResponse.next();
+  const response = NextResponse.next();
 
   // Handle silent token refresh
   if (tokenValid && shouldRefresh && token) {

@@ -31,7 +31,10 @@ export const Navbar: React.FC<NavbarProps> = ({ lng }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
-    const token = getCookie('user_token');
+    let token = getCookie('user_token');
+    if (!token && typeof window !== 'undefined') {
+      token = localStorage.getItem('user_token') || undefined;
+    }
     if (token) {
       try {
         const parts = token.split('.');
@@ -56,8 +59,11 @@ export const Navbar: React.FC<NavbarProps> = ({ lng }) => {
   };
 
   const handleLogout = () => {
-    // Clear user token cookie
+    // Clear user token cookie and localStorage
     document.cookie = 'user_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('user_token');
+    }
     setIsAuthenticated(false);
     setUserRole('');
     setIsDropdownOpen(false);

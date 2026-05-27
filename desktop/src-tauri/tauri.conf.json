@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "identifier": "com.erickmx.texis-pos",
   "build": {
-    "frontendDist": "../dist",
+    "frontendDist": "../../ui/out",
     "devUrl": "http://localhost:3000",
     "beforeDevCommand": "",
     "beforeBuildCommand": ""

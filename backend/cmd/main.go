@@ -52,7 +52,7 @@ func main() {
 		whitelist = "http://localhost:3000"
 	}
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: strings.Split(whitelist, ","),
+		AllowOrigins: getCorsOrigins(whitelist),
 	}))
 
 	// Rate Limiter: 100 requests per 60 seconds
@@ -110,4 +110,17 @@ func main() {
 	if err := app.Listen(":" + port); err != nil {
 		log.Fatalf("failed to start server: %v", err)
 	}
+}
+
+func getCorsOrigins(whitelist string) []string {
+	var origins []string
+	parts := strings.Split(whitelist, ",")
+	for _, part := range parts {
+		trimmed := strings.TrimSpace(part)
+		if trimmed != "" {
+			origins = append(origins, trimmed)
+		}
+	}
+	origins = append(origins, "tauri://localhost", "https://tauri.localhost")
+	return origins
 }
