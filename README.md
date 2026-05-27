@@ -48,13 +48,57 @@ yarn install
 yarn dev
 ```
 
-### Desktop
+#### Desktop (Tauri)
 
-```bash
+The desktop app connects to the Next.js frontend (`ui`) and the Go backend (`backend`).
+
+#### Development Mode
+
+To run and test the desktop application in development mode:
+
+1. **Start the Backend Go Server**:
+   ```bash
+   cd backend
+   go run cmd/main.go
+   ```
+2. **Start the Next.js Frontend Dev Server**:
+   Tauri's dev configuration relies on the running Next.js dev server on port `3000`.
+   ```bash
+   cd ui
+   yarn dev
+   ```
+3. **Run the Tauri App**:
+   In another terminal, start the Tauri dev environment:
+   ```bash
+   cd desktop
+   yarn tauri dev
+   ```
+
+#### Production Mode (Static Compilation & Installation Bundles)
+
+Tauri v2 requires the Next.js frontend to be statically exported (`output: 'export'`) because the desktop app loads static HTML/CSS/JS files directly without a Next.js server.
+
+You can automate the build using the provided release script:
+```powershell
+# In PowerShell (Windows / macOS / Linux)
 cd desktop
-yarn install
-yarn tauri dev
+./scripts/build-release.ps1
 ```
+
+Or you can compile manually in two steps:
+
+1. **Build and statically export the Next.js UI** (using the `TAURI_BUILD=true` flag):
+   ```bash
+   cd ui
+   TAURI_BUILD=true yarn build
+   ```
+   This generates the static files in `ui/out/`.
+2. **Build and bundle the Tauri App**:
+   ```bash
+   cd desktop
+   yarn tauri build
+   ```
+   The compiled executables and installers (MSI / EXE for Windows, DMG / APP for macOS) will be generated in `desktop/src-tauri/target/release/bundle/`.
 
 ## Tech Stack
 

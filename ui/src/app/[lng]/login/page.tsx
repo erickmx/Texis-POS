@@ -53,6 +53,34 @@ function LoginForm({ params }: LoginPageProps) {
     }
   }, [searchParams, t]);
 
+  // Redirect authenticated users to inventory
+  useEffect(() => {
+    const getCookie = (name: string): string | undefined => {
+      const match = document.cookie.split('; ').find((c) => c.trim().startsWith(`${name}=`));
+      return match ? decodeURIComponent(match.split('=')[1]) : undefined;
+    };
+
+    let token = getCookie('user_token');
+    if (!token && typeof window !== 'undefined') {
+      token = localStorage.getItem('user_token') || undefined;
+    }
+
+    if (token) {
+      try {
+        const parts = token.split('.');
+        if (parts.length === 3) {
+          const payload = JSON.parse(atob(parts[1]));
+          const exp = payload.exp * 1000;
+          if (Date.now() < exp) {
+            router.replace(`/${lng}/inventory`);
+          }
+        }
+      } catch (e) {
+        // Invalid token format
+      }
+    }
+  }, [router, lng]);
+
   // Lockout countdown timer ticking
   useEffect(() => {
     if (lockoutSeconds <= 0) return;
@@ -115,8 +143,10 @@ function LoginForm({ params }: LoginPageProps) {
         return;
       }
 
-      // Successful Auth: Save Token to Cookie (lifetime: 24h)
-      document.cookie = `user_token=${result.token}; max-age=86400; path=/; samesite=lax; secure`;
+      // Successful Auth: Save Token to Cookie (lifetime: 24h) and localStorage
+      const secure = window.location.protocol === 'https:';
+      document.cookie = `user_token=${result.token}; max-age=86400; path=/; samesite=lax${secure ? '; secure' : ''}`;
+      localStorage.setItem('user_token', result.token);
       toast.success(t('auth.submit_button') + ' ' + t('inventory.success_edit').replace(/.*success.*/i, ''));
       
       // Redirect to Inventory dashboard

@@ -1,9 +1,9 @@
 import { render, screen, act } from '@testing-library/react';
 import { HealthSummary } from '../HealthSummary';
 
-// Mock server side useTranslation
-jest.mock('@/i18n/server', () => ({
-  useTranslation: () => Promise.resolve({
+// Mock client side useTranslation
+jest.mock('@/i18n/client', () => ({
+  useTranslation: () => ({
     t: (key: string) => {
       const trans: Record<string, string> = {
         'inventory.health_summary.title': 'Resumen de Salud',
@@ -17,10 +17,8 @@ jest.mock('@/i18n/server', () => ({
 }));
 
 describe('HealthSummary Component', () => {
-  it('should render translated metrics', async () => {
-    await act(async () => {
-      render(await HealthSummary({ optimizationScore: 94, urgentItemsCount: 12, lng: 'es' }) as any);
-    });
+  it('should render translated metrics', () => {
+    render(<HealthSummary optimizationScore={94} urgentItemsCount={12} lng="es" />);
     expect(screen.getByText('Resumen de Salud')).toBeInTheDocument();
     expect(screen.getByText(/94% optimized/i)).toBeInTheDocument();
     expect(screen.getByText(/12 items/i)).toBeInTheDocument();

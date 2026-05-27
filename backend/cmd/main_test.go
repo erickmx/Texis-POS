@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"strings"
 	"testing"
 	"time"
 
@@ -26,7 +25,7 @@ func setupTestApp() *fiber.App {
 		whitelist = "http://localhost:3000"
 	}
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: strings.Split(whitelist, ","),
+		AllowOrigins: getCorsOrigins(whitelist),
 	}))
 
 	app.Use(limiter.New(limiter.Config{
@@ -79,6 +78,41 @@ func TestCORSWhitelist(t *testing.T) {
 
 		assert.Nil(t, err)
 		assert.Empty(t, resp.Header.Get("Access-Control-Allow-Origin"))
+	})
+
+	t.Run("Tauri Origin", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/test", nil)
+		req.Header.Set("Origin", "tauri://localhost")
+		resp, err := app.Test(req)
+
+		assert.Nil(t, err)
+		assert.Equal(t, "tauri://localhost", resp.Header.Get("Access-Control-Allow-Origin"))
+	})
+
+	t.Run("Tauri HTTPS Origin", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/test", nil)
+		req.Header.Set("Origin", "https://tauri.localhost")
+		resp, err := app.Test(req)
+
+		assert.Nil(t, err)
+		assert.Equal(t, "https://tauri.localhost", resp.Header.Get("Access-Control-Allow-Origin"))
+	})
+}
+
+func TestGetCorsOrigins(t *testing.T) {
+	t.Run("Empty whitelist", func(t *testing.T) {
+		origins := getCorsOrigins("")
+		assert.Equal(t, []string{"tauri://localhost", "https://tauri.localhost"}, origins)
+	})
+
+	t.Run("Whitespace entries and empty components", func(t *testing.T) {
+		origins := getCorsOrigins(" http://allowed.com ,  , http://another.com ")
+		assert.Equal(t, []string{"http://allowed.com", "http://another.com", "tauri://localhost", "https://tauri.localhost"}, origins)
+	})
+
+	t.Run("Single entry", func(t *testing.T) {
+		origins := getCorsOrigins("http://onlyone.com")
+		assert.Equal(t, []string{"http://onlyone.com", "tauri://localhost", "https://tauri.localhost"}, origins)
 	})
 }
 
