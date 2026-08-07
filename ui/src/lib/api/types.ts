@@ -124,3 +124,46 @@ export function mapCategory(r: CategoryResponse): Category {
     createdAt: r.created_at,
   };
 }
+
+// --- Special Requests ---
+
+export interface SpecialOrderResponse {
+  folio: number;
+  orderId: string;
+  customerName: string;
+  status: string;
+  title: string;
+  description: string;
+  deadline: string | null;
+  attachmentCount: number;
+  phase: string | null;
+  progressPct: number | null;
+}
+
+export interface SpecialOrder {
+  folio: number;
+  orderId: string;
+  customerName: string;
+  status: 'pending' | 'in_progress' | 'done';
+  title: string;
+  description: string;
+  deadline: string | null;
+  attachmentCount: number;
+  phase: string | null;
+  progressPct: number | null;
+}
+
+export function mapSpecialOrder(r: SpecialOrderResponse): SpecialOrder {
+  return {
+    folio: r.folio,
+    orderId: r.orderId,
+    customerName: r.customerName ?? '',
+    status: r.status as SpecialOrder['status'],
+    title: r.title ?? '',
+    description: r.description ?? '',
+    deadline: r.deadline ?? null,
+    attachmentCount: r.attachmentCount ?? 0,
+    phase: r.phase ?? null,
+    progressPct: r.progressPct ?? null,
+  };
+}

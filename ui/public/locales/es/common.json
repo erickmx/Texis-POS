@@ -6,6 +6,7 @@
     "stock_levels": "Niveles de Stock",
     "analytics": "Análisis",
     "history": "Historial",
+    "special_requests": "Pedidos Especiales",
     "help": "Ayuda",
     "logout": "Cerrar Sesión"
   },
@@ -105,6 +106,35 @@
       "email_required": "El usuario o correo electrónico es obligatorio",
       "invalid_email": "Por favor ingrese un correo electrónico válido",
       "password_required": "La contraseña es obligatoria"
+    }
+  },
+  "specialRequests": {
+    "title": "Pedidos Especiales",
+    "newRequest": "Nuevo Pedido",
+    "columns": {
+      "pending": "Pendiente",
+      "in_progress": "En Progreso",
+      "done": "Completado"
+    },
+    "urgency": {
+      "overdue": "VENCIDO",
+      "urgent": "Urgente",
+      "warning": "Próximo",
+      "normal": "Normal"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "in_progress": "En Progreso",
+      "done": "Completado"
+    },
+    "active": "ACTIVO",
+    "attachments": "{{count}} adjunto(s)",
+    "empty": {
+      "board": "No hay pedidos especiales",
+      "column": "Sin pedidos"
+    },
+    "error": {
+      "moveFailed": "Error al mover el pedido"
     }
   }
 }

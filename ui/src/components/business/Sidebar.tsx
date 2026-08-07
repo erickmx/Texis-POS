@@ -10,7 +10,8 @@ import {
   TrendingUp,
   HelpCircle, 
   LogOut,
-  BookOpen
+  BookOpen,
+  ClipboardList
 } from 'lucide-react';
 import { Icon } from '../ui/Icon';
 import { useTranslation } from '@/i18n/client';
@@ -27,6 +28,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ lng }) => {
     { name: t('sidebar.overview'), icon: LayoutDashboard, href: `/${lng}/overview` },
     { name: t('sidebar.catalog'), icon: Package, href: `/${lng}/inventory` },
     { name: t('sidebar.stock_levels'), icon: TrendingUp, href: `/${lng}/stock` },
+    { name: t('sidebar.special_requests'), icon: ClipboardList, href: `/${lng}/special-requests` },
     { name: t('sidebar.analytics'), icon: BarChart3, href: `/${lng}/analytics` },
     { name: t('sidebar.history'), icon: History, href: `/${lng}/history` },
   ];
