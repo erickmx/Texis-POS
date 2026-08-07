@@ -75,3 +75,31 @@ func TestOrderFilter_Validate(t *testing.T) {
 		assert.Equal(t, "search", errs[0].Field)
 	})
 }
+
+func TestValidateStatus(t *testing.T) {
+	t.Run("valid pending", func(t *testing.T) {
+		assert.Empty(t, ValidateStatus("pending"))
+	})
+
+	t.Run("valid in_progress", func(t *testing.T) {
+		assert.Empty(t, ValidateStatus("in_progress"))
+	})
+
+	t.Run("valid done", func(t *testing.T) {
+		assert.Empty(t, ValidateStatus("done"))
+	})
+
+	t.Run("invalid status", func(t *testing.T) {
+		errs := ValidateStatus("cancelled")
+		assert.Len(t, errs, 1)
+		assert.Equal(t, "status", errs[0].Field)
+		assert.Contains(t, errs[0].Message, "invalid status")
+	})
+
+	t.Run("empty status", func(t *testing.T) {
+		errs := ValidateStatus("")
+		assert.Len(t, errs, 1)
+		assert.Equal(t, "status", errs[0].Field)
+		assert.Contains(t, errs[0].Message, "required")
+	})
+}
