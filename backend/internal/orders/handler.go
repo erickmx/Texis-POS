@@ -83,6 +83,9 @@ func (h *Handler) UpdateOrderStatus(c fiber.Ctx) error {
 				{"field": "status", "message": strings.TrimPrefix(err.Error(), "validation: ")},
 			}})
 		}
+		if strings.Contains(err.Error(), "order not found") {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "order not found"})
+		}
 		log.Printf("UpdateOrderStatus error: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "internal server error"})
 	}

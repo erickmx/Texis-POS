@@ -53,10 +53,7 @@ func (r *SupabaseOrderRepository) List(ctx context.Context, filter validation.Or
 // ListSpecial fetches orders with is_special_request=true joined with special_requests_details.
 func (r *SupabaseOrderRepository) ListSpecial(ctx context.Context) ([]orders.SpecialOrder, error) {
 	qb := r.client.From("orders").
-		Select(`id,folio,customer_name,status,is_special_request,total_amount,created_at,
-			special_requests_details!inner(
-				task_description,deadline,attachments,title,phase,progress_pct,completed_at
-			)`, "exact", false).
+		Select("id,folio,customer_name,status,is_special_request,total_amount,created_at,special_requests_details!inner(task_description,deadline,attachments,title,phase,progress_pct,completed_at)", "exact", false).
 		Eq("is_special_request", "true")
 
 	data, _, err := qb.Execute()
@@ -74,8 +71,25 @@ func (r *SupabaseOrderRepository) ListSpecial(ctx context.Context) ([]orders.Spe
 
 // UpdateStatus updates the order status and manages completed_at on the detail row.
 func (r *SupabaseOrderRepository) UpdateStatus(ctx context.Context, id string, status string) error {
+	// Verify the order exists and is a special request
+	data, _, err := r.client.From("orders").
+		Select("id", "", false).
+		Eq("id", id).
+		Eq("is_special_request", "true").
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to check order existence: %w", err)
+	}
+	var existing []map[string]interface{}
+	if err := json.Unmarshal([]byte(data), &existing); err != nil {
+		return fmt.Errorf("failed to parse order check: %w", err)
+	}
+	if len(existing) == 0 {
+		return fmt.Errorf("order not found")
+	}
+
 	// Update orders.status
-	_, _, err := r.client.From("orders").
+	_, _, err = r.client.From("orders").
 		Update(map[string]interface{}{"status": status}, "", "").
 		Eq("id", id).
 		Execute()
@@ -88,7 +102,6 @@ func (r *SupabaseOrderRepository) UpdateStatus(ctx context.Context, id string, s
 	if status == "done" {
 		completedAt = time.Now().UTC().Format(time.RFC3339)
 	}
-	// For non-done statuses, completedAt stays nil (clears the field)
 
 	_, _, err = r.client.From("special_requests_details").
 		Update(map[string]interface{}{"completed_at": completedAt}, "", "").
