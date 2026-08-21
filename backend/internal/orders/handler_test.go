@@ -3,6 +3,7 @@ package orders
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http/httptest"
 	"testing"
@@ -153,4 +154,22 @@ func TestOrdersHandler_UpdateOrderStatus_EmptyStatus(t *testing.T) {
 	resp, _ := app.Test(req)
 
 	assert.Equal(t, 400, resp.StatusCode)
+}
+
+func TestOrdersHandler_UpdateOrderStatus_UnknownID_Returns404(t *testing.T) {
+	mockRepo := new(MockOrderRepo)
+	mockRepo.On("UpdateStatus", mock.Anything, "00000000-0000-0000-0000-000000000000", "in_progress").
+		Return(errors.New("order not found"))
+	app := setupOrdersTestApp(mockRepo)
+
+	body := bytes.NewBufferString(`{"status":"in_progress"}`)
+	req := httptest.NewRequest("PATCH", "/api/orders/00000000-0000-0000-0000-000000000000/status", body)
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req)
+
+	assert.Equal(t, 404, resp.StatusCode)
+	respBody, _ := io.ReadAll(resp.Body)
+	var result map[string]string
+	json.Unmarshal(respBody, &result)
+	assert.Equal(t, "order not found", result["error"])
 }
