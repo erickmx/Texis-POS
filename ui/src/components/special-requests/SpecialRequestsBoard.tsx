@@ -36,6 +36,41 @@ interface SpecialRequestsBoardProps {
   lng: string;
 }
 
+export function createDragEndHandler(deps: {
+  requests: SpecialOrder[];
+  mutate: (fn: () => Promise<SpecialOrder[]>, opts: object) => Promise<unknown>;
+  t: (key: string) => string;
+  onClearActive: () => void;
+}) {
+  return async (event: DragEndEvent) => {
+    deps.onClearActive();
+    const { active, over } = event;
+    if (!over) return;
+
+    const orderId = active.id as string;
+    const newStatus = over.id as string;
+    const order = deps.requests.find((r) => r.orderId === orderId);
+    if (!order || order.status === newStatus) return;
+    if (!COLUMNS.some((c) => c.status === newStatus)) return;
+
+    const optimisticData = deps.requests.map((r) =>
+      r.orderId === orderId ? { ...r, status: newStatus as SpecialOrder['status'] } : r
+    );
+
+    try {
+      await deps.mutate(
+        async () => {
+          await updateOrderStatus(orderId, newStatus);
+          return optimisticData;
+        },
+        { optimisticData, rollbackOnError: true, revalidate: true }
+      );
+    } catch {
+      toast.error(deps.t('specialRequests.error.moveFailed'));
+    }
+  };
+}
+
 export const SpecialRequestsBoard: React.FC<SpecialRequestsBoardProps> = ({ lng }) => {
   const { t } = useTranslation(lng, 'common');
   const { requests, isLoading, mutate } = useSpecialRequests();
@@ -56,40 +91,7 @@ export const SpecialRequestsBoard: React.FC<SpecialRequestsBoardProps> = ({ lng 
   }, []);
 
   const handleDragEnd = useCallback(
-    async (event: DragEndEvent) => {
-      setActiveId(null);
-      const { active, over } = event;
-      if (!over) return;
-
-      const orderId = active.id as string;
-      const newStatus = over.id as string;
-      const order = requests.find((r) => r.orderId === orderId);
-      if (!order || order.status === newStatus) return;
-
-      // Validate newStatus is a valid column
-      if (!COLUMNS.some((c) => c.status === newStatus)) return;
-
-      // Optimistic update
-      const optimisticData = requests.map((r) =>
-        r.orderId === orderId ? { ...r, status: newStatus as SpecialOrder['status'] } : r
-      );
-
-      try {
-        await mutate(
-          async () => {
-            await updateOrderStatus(orderId, newStatus);
-            return optimisticData;
-          },
-          {
-            optimisticData,
-            rollbackOnError: true,
-            revalidate: true,
-          }
-        );
-      } catch {
-        toast.error(t('specialRequests.error.moveFailed'));
-      }
-    },
+    createDragEndHandler({ requests, mutate, t, onClearActive: () => setActiveId(null) }),
     [requests, mutate, t]
   );
 
@@ -126,6 +128,11 @@ export const SpecialRequestsBoard: React.FC<SpecialRequestsBoardProps> = ({ lng 
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
+        {!isLoading && requests.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-24 text-center" data-testid="board-empty">
+            <p className="text-on-surface-variant/60 text-lg font-medium">{t('specialRequests.empty.board')}</p>
+          </div>
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {COLUMNS.map((col) => (
             <BoardColumn
@@ -138,6 +145,7 @@ export const SpecialRequestsBoard: React.FC<SpecialRequestsBoardProps> = ({ lng 
             />
           ))}
         </div>
+        )}
 
         <DragOverlay>
           {activeOrder ? <RequestCard order={activeOrder} /> : null}
