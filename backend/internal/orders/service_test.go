@@ -68,7 +68,7 @@ func TestOrderService_ListSpecialOrders(t *testing.T) {
 		mockRepo.On("ListSpecial", ctx).Return([]SpecialOrder{
 			{
 				ID: "uuid-1", Folio: 100, CustomerName: &customer, Status: "pending",
-				SpecialRequestsDetails: []SpecialRequestDetail{
+				SpecialRequestsDetails: SpecialRequestDetails{
 					{Title: &title, TaskDescription: &desc, Attachments: []string{"a.pdf", "b.pdf"}},
 				},
 			},
@@ -92,11 +92,11 @@ func TestOrderService_ListSpecialOrders(t *testing.T) {
 		mockRepo.On("ListSpecial", ctx).Return([]SpecialOrder{
 			{
 				ID: "old", Folio: 1, Status: "done",
-				SpecialRequestsDetails: []SpecialRequestDetail{{CompletedAt: &oldTime}},
+				SpecialRequestsDetails: SpecialRequestDetails{{CompletedAt: &oldTime}},
 			},
 			{
 				ID: "recent", Folio: 2, Status: "done",
-				SpecialRequestsDetails: []SpecialRequestDetail{{CompletedAt: &recentTime}},
+				SpecialRequestsDetails: SpecialRequestDetails{{CompletedAt: &recentTime}},
 			},
 		}, nil)
 
@@ -112,9 +112,9 @@ func TestOrderService_ListSpecialOrders(t *testing.T) {
 		d1 := time.Now().UTC().Add(48 * time.Hour)
 		d2 := time.Now().UTC().Add(24 * time.Hour)
 		mockRepo.On("ListSpecial", ctx).Return([]SpecialOrder{
-			{ID: "a", Folio: 1, Status: "pending", SpecialRequestsDetails: []SpecialRequestDetail{{Deadline: &d1}}},
-			{ID: "b", Folio: 2, Status: "pending", SpecialRequestsDetails: []SpecialRequestDetail{{Deadline: &d2}}},
-			{ID: "c", Folio: 3, Status: "pending", SpecialRequestsDetails: []SpecialRequestDetail{{Deadline: nil}}},
+			{ID: "a", Folio: 1, Status: "pending", SpecialRequestsDetails: SpecialRequestDetails{{Deadline: &d1}}},
+			{ID: "b", Folio: 2, Status: "pending", SpecialRequestsDetails: SpecialRequestDetails{{Deadline: &d2}}},
+			{ID: "c", Folio: 3, Status: "pending", SpecialRequestsDetails: SpecialRequestDetails{{Deadline: nil}}},
 		}, nil)
 
 		result, err := service.ListSpecialOrders(ctx)
@@ -129,7 +129,7 @@ func TestOrderService_ListSpecialOrders(t *testing.T) {
 		mockRepo := new(MockOrderRepo)
 		service := NewService(mockRepo)
 		mockRepo.On("ListSpecial", ctx).Return([]SpecialOrder{
-			{ID: "x", Folio: 5, Status: "pending", SpecialRequestsDetails: []SpecialRequestDetail{}},
+			{ID: "x", Folio: 5, Status: "pending", SpecialRequestsDetails: SpecialRequestDetails{}},
 		}, nil)
 
 		result, err := service.ListSpecialOrders(ctx)

@@ -85,7 +85,7 @@ func TestOrdersHandler_ListSpecialOrders_Success(t *testing.T) {
 	mockRepo.On("ListSpecial", mock.Anything).Return([]SpecialOrder{
 		{
 			ID: "uuid-1", Folio: 100, Status: "pending",
-			SpecialRequestsDetails: []SpecialRequestDetail{{}},
+			SpecialRequestsDetails: SpecialRequestDetails{{}},
 		},
 	}, nil)
 	app := setupOrdersTestApp(mockRepo)

@@ -1,6 +1,10 @@
 package orders
 
-import "time"
+import (
+	"bytes"
+	"encoding/json"
+	"time"
+)
 
 type PaginationMeta struct {
 	Page       int   `json:"page"`
@@ -38,16 +42,45 @@ type SpecialRequestDetail struct {
 	CompletedAt     *time.Time `json:"completed_at"`
 }
 
+// SpecialRequestDetails normalizes the PostgREST embedded payload. The
+// special_requests_details.order_id column is a PRIMARY KEY, so the relation
+// is to-one and PostgREST embeds a single object; arrays are accepted too for
+// forward compatibility.
+type SpecialRequestDetails []SpecialRequestDetail
+
+// UnmarshalJSON accepts either a JSON object (to-one embed) or an array.
+func (d *SpecialRequestDetails) UnmarshalJSON(data []byte) error {
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 || string(trimmed) == "null" {
+		*d = nil
+		return nil
+	}
+	if trimmed[0] == '[' {
+		var list []SpecialRequestDetail
+		if err := json.Unmarshal(trimmed, &list); err != nil {
+			return err
+		}
+		*d = list
+		return nil
+	}
+	var one SpecialRequestDetail
+	if err := json.Unmarshal(trimmed, &one); err != nil {
+		return err
+	}
+	*d = SpecialRequestDetails{one}
+	return nil
+}
+
 // SpecialOrder is the postgrest join result (orders + special_requests_details).
 type SpecialOrder struct {
-	ID                     string                   `json:"id"`
-	Folio                  int                      `json:"folio"`
-	CustomerName           *string                  `json:"customer_name"`
-	Status                 string                   `json:"status"`
-	IsSpecialRequest       bool                     `json:"is_special_request"`
-	TotalAmount            float64                  `json:"total_amount"`
-	CreatedAt              time.Time                `json:"created_at"`
-	SpecialRequestsDetails []SpecialRequestDetail   `json:"special_requests_details"`
+	ID                     string                `json:"id"`
+	Folio                  int                   `json:"folio"`
+	CustomerName           *string               `json:"customer_name"`
+	Status                 string                `json:"status"`
+	IsSpecialRequest       bool                  `json:"is_special_request"`
+	TotalAmount            float64               `json:"total_amount"`
+	CreatedAt              time.Time             `json:"created_at"`
+	SpecialRequestsDetails SpecialRequestDetails `json:"special_requests_details"`
 }
 
 // SpecialOrderResponse is the flat DTO sent to the UI.
