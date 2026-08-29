@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/erickmx/texis-pos/internal/orders"
 	"github.com/erickmx/texis-pos/internal/orders/validation"
@@ -47,4 +48,68 @@ func (r *SupabaseOrderRepository) List(ctx context.Context, filter validation.Or
 	}
 
 	return orderList, count, nil
+}
+
+// ListSpecial fetches orders with is_special_request=true joined with special_requests_details.
+func (r *SupabaseOrderRepository) ListSpecial(ctx context.Context) ([]orders.SpecialOrder, error) {
+	qb := r.client.From("orders").
+		Select("id,folio,customer_name,status,is_special_request,total_amount,created_at,special_requests_details!inner(task_description,deadline,attachments,title,phase,progress_pct,completed_at)", "exact", false).
+		Eq("is_special_request", "true")
+
+	data, _, err := qb.Execute()
+	if err != nil {
+		return nil, fmt.Errorf("failed to list special orders: %w", err)
+	}
+
+	var result []orders.SpecialOrder
+	if err := json.Unmarshal([]byte(data), &result); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal special orders: %w", err)
+	}
+
+	return result, nil
+}
+
+// UpdateStatus updates the order status and manages completed_at on the detail row.
+func (r *SupabaseOrderRepository) UpdateStatus(ctx context.Context, id string, status string) error {
+	// Verify the order exists and is a special request
+	data, _, err := r.client.From("orders").
+		Select("id", "", false).
+		Eq("id", id).
+		Eq("is_special_request", "true").
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to check order existence: %w", err)
+	}
+	var existing []map[string]interface{}
+	if err := json.Unmarshal([]byte(data), &existing); err != nil {
+		return fmt.Errorf("failed to parse order check: %w", err)
+	}
+	if len(existing) == 0 {
+		return fmt.Errorf("order not found")
+	}
+
+	// Update orders.status
+	_, _, err = r.client.From("orders").
+		Update(map[string]interface{}{"status": status}, "", "").
+		Eq("id", id).
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to update order status: %w", err)
+	}
+
+	// Manage completed_at on special_requests_details
+	var completedAt interface{}
+	if status == "done" {
+		completedAt = time.Now().UTC().Format(time.RFC3339)
+	}
+
+	_, _, err = r.client.From("special_requests_details").
+		Update(map[string]interface{}{"completed_at": completedAt}, "", "").
+		Eq("order_id", id).
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to update completed_at: %w", err)
+	}
+
+	return nil
 }

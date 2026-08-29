@@ -6,6 +6,7 @@
     "stock_levels": "Stock Levels",
     "analytics": "Analytics",
     "history": "History",
+    "special_requests": "Special Requests",
     "help": "Help",
     "logout": "Logout"
   },
@@ -105,6 +106,35 @@
       "email_required": "Username or email is required",
       "invalid_email": "Please enter a valid email address",
       "password_required": "Password is required"
+    }
+  },
+  "specialRequests": {
+    "title": "Special Requests",
+    "newRequest": "New Request",
+    "columns": {
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "done": "Done"
+    },
+    "urgency": {
+      "overdue": "OVERDUE",
+      "urgent": "Urgent",
+      "warning": "Upcoming",
+      "normal": "Normal"
+    },
+    "status": {
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "done": "Done"
+    },
+    "active": "ACTIVE",
+    "attachments": "{{count}} attachment(s)",
+    "empty": {
+      "board": "No special requests",
+      "column": "No orders"
+    },
+    "error": {
+      "moveFailed": "Failed to move the order"
     }
   }
 }

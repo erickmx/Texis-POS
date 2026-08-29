@@ -1,28 +1,28 @@
 import { render, screen, act } from '@testing-library/react';
 import { Sidebar } from '../Sidebar';
 
-// Mock useTranslation for client components
+let currentLng = 'es';
+
+const es: Record<string, string> = {
+  'sidebar.warehouse': 'ALMACÉN PRINCIPAL', 'sidebar.overview': 'Vista General',
+  'sidebar.catalog': 'Catálogo', 'sidebar.stock_levels': 'Niveles de Stock',
+  'sidebar.special_requests': 'Pedidos Especiales',
+};
+const en: Record<string, string> = {
+  'sidebar.warehouse': 'MAIN WAREHOUSE', 'sidebar.overview': 'Overview',
+  'sidebar.catalog': 'Catalog', 'sidebar.stock_levels': 'Stock Levels',
+  'sidebar.special_requests': 'Special Requests',
+};
+
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => {
-      const trans: Record<string, string> = {
-        'sidebar.warehouse': 'ALMACÉN PRINCIPAL',
-        'sidebar.overview': 'Vista General',
-        'sidebar.catalog': 'Catálogo',
-        'sidebar.stock_levels': 'Niveles de Stock',
-        'sidebar.analytics': 'Análisis',
-        'sidebar.history': 'Historial',
-        'sidebar.help': 'Ayuda',
-        'sidebar.logout': 'Cerrar Sesión'
-      };
-      return trans[key] || key;
-    },
+    t: (key: string) => (currentLng === 'en' ? en : es)[key] || key,
   }),
 }));
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
-  usePathname: () => '/es/inventory',
+  usePathname: () => `/${currentLng}/inventory`,
 }));
 
 describe('Sidebar Component', () => {
@@ -43,5 +43,18 @@ describe('Sidebar Component', () => {
     render(<Sidebar lng="es" />);
     const catalogLink = screen.getByText('Catálogo').closest('div');
     expect(catalogLink).toHaveClass('bg-[#f1f6ff]');
+  });
+
+  it('should render the special requests nav link with Spanish label.', () => {
+    currentLng = 'es';
+    render(<Sidebar lng="es" />);
+    expect(screen.getByText('Pedidos Especiales')).toBeInTheDocument();
+  });
+
+  it('should render the special requests nav link with English label.', () => {
+    currentLng = 'en';
+    render(<Sidebar lng="en" />);
+    expect(screen.getByText('Special Requests')).toBeInTheDocument();
+    currentLng = 'es'; // reset
   });
 });

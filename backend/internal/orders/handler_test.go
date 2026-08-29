@@ -1,7 +1,9 @@
 package orders
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http/httptest"
 	"testing"
@@ -76,4 +78,98 @@ func TestOrdersHandler_ListOrders_MultipleInvalidParams(t *testing.T) {
 	var result map[string][]map[string]string
 	json.NewDecoder(resp.Body).Decode(&result)
 	assert.GreaterOrEqual(t, len(result["errors"]), 2, "should accumulate multiple errors")
+}
+
+func TestOrdersHandler_ListSpecialOrders_Success(t *testing.T) {
+	mockRepo := new(MockOrderRepo)
+	mockRepo.On("ListSpecial", mock.Anything).Return([]SpecialOrder{
+		{
+			ID: "uuid-1", Folio: 100, Status: "pending",
+			SpecialRequestsDetails: SpecialRequestDetails{{}},
+		},
+	}, nil)
+	app := setupOrdersTestApp(mockRepo)
+
+	req := httptest.NewRequest("GET", "/api/orders/special", nil)
+	resp, _ := app.Test(req)
+
+	assert.Equal(t, 200, resp.StatusCode)
+	var result []SpecialOrderResponse
+	json.NewDecoder(resp.Body).Decode(&result)
+	assert.Len(t, result, 1)
+	assert.Equal(t, 100, result[0].Folio)
+}
+
+func TestOrdersHandler_ListSpecialOrders_EmptyArray(t *testing.T) {
+	mockRepo := new(MockOrderRepo)
+	mockRepo.On("ListSpecial", mock.Anything).Return([]SpecialOrder(nil), nil)
+	app := setupOrdersTestApp(mockRepo)
+
+	req := httptest.NewRequest("GET", "/api/orders/special", nil)
+	resp, _ := app.Test(req)
+
+	assert.Equal(t, 200, resp.StatusCode)
+	body, _ := io.ReadAll(resp.Body)
+	assert.Equal(t, "[]", string(body))
+}
+
+func TestOrdersHandler_UpdateOrderStatus_Success(t *testing.T) {
+	mockRepo := new(MockOrderRepo)
+	mockRepo.On("UpdateStatus", mock.Anything, "uuid-1", "in_progress").Return(nil)
+	app := setupOrdersTestApp(mockRepo)
+
+	body := bytes.NewBufferString(`{"status":"in_progress"}`)
+	req := httptest.NewRequest("PATCH", "/api/orders/uuid-1/status", body)
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req)
+
+	assert.Equal(t, 200, resp.StatusCode)
+	var result UpdateStatusResponse
+	json.NewDecoder(resp.Body).Decode(&result)
+	assert.Equal(t, "uuid-1", result.ID)
+	assert.Equal(t, "in_progress", result.Status)
+}
+
+func TestOrdersHandler_UpdateOrderStatus_InvalidStatus(t *testing.T) {
+	mockRepo := new(MockOrderRepo)
+	app := setupOrdersTestApp(mockRepo)
+
+	body := bytes.NewBufferString(`{"status":"invalid"}`)
+	req := httptest.NewRequest("PATCH", "/api/orders/uuid-1/status", body)
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req)
+
+	assert.Equal(t, 400, resp.StatusCode)
+	respBody, _ := io.ReadAll(resp.Body)
+	assert.Contains(t, string(respBody), "invalid status")
+}
+
+func TestOrdersHandler_UpdateOrderStatus_EmptyStatus(t *testing.T) {
+	mockRepo := new(MockOrderRepo)
+	app := setupOrdersTestApp(mockRepo)
+
+	body := bytes.NewBufferString(`{"status":""}`)
+	req := httptest.NewRequest("PATCH", "/api/orders/uuid-1/status", body)
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req)
+
+	assert.Equal(t, 400, resp.StatusCode)
+}
+
+func TestOrdersHandler_UpdateOrderStatus_UnknownID_Returns404(t *testing.T) {
+	mockRepo := new(MockOrderRepo)
+	mockRepo.On("UpdateStatus", mock.Anything, "00000000-0000-0000-0000-000000000000", "in_progress").
+		Return(errors.New("order not found"))
+	app := setupOrdersTestApp(mockRepo)
+
+	body := bytes.NewBufferString(`{"status":"in_progress"}`)
+	req := httptest.NewRequest("PATCH", "/api/orders/00000000-0000-0000-0000-000000000000/status", body)
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req)
+
+	assert.Equal(t, 404, resp.StatusCode)
+	respBody, _ := io.ReadAll(resp.Body)
+	var result map[string]string
+	json.Unmarshal(respBody, &result)
+	assert.Equal(t, "order not found", result["error"])
 }
