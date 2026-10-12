@@ -12,18 +12,19 @@ import (
 )
 
 const (
-	MaxFileSize    = 5 * 1024 * 1024 // 5MB
+	MaxFileSize     = 5 * 1024 * 1024 // 5MB
 	InventoryBucket = "inventory-images"
 )
 
 var (
-	ErrFileTooLarge    = errors.New("file is too large (max 5MB)")
-	ErrInvalidFormat   = errors.New("invalid image format (supported: JPEG, JPG, WebP)")
-	ErrImageNotFound   = errors.New("image not found in storage")
+	ErrFileTooLarge   = errors.New("file is too large (max 5MB)")
+	ErrInvalidFormat  = errors.New("invalid image format (supported: JPEG, JPG, PNG, WebP)")
+	ErrImageNotFound  = errors.New("image not found in storage")
 	AllowedExtensions = map[string]bool{
 		".jpeg": true,
 		".jpg":  true,
 		".webp": true,
+		".png":  true,
 	}
 )
 
@@ -58,4 +59,9 @@ func (s *Service) Upload(ctx context.Context, reader io.Reader, originalFilename
 // Exists checks if an image exists in the inventory bucket.
 func (s *Service) Exists(ctx context.Context, imagePath string) (bool, error) {
 	return s.provider.Exists(ctx, InventoryBucket, imagePath)
+}
+
+// Delete hard-deletes an object from the inventory bucket.
+func (s *Service) Delete(ctx context.Context, filename string) error {
+	return s.provider.Delete(ctx, InventoryBucket, filename)
 }

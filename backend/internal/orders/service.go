@@ -80,17 +80,38 @@ func (s *Service) ListSpecialOrders(ctx context.Context) ([]SpecialOrderResponse
 			attachmentCount = len(detail.Attachments)
 		}
 
+		attachments := []string{}
+		if detail.Attachments != nil {
+			attachments = detail.Attachments
+		}
+		customerWa := ""
+		if so.CustomerWA != nil {
+			customerWa = *so.CustomerWA
+		}
+		gasto := 0.0
+		if detail.GastoTerceros != nil {
+			gasto = *detail.GastoTerceros
+		}
+		service := 0.0
+		if detail.ServiceFee != nil {
+			service = *detail.ServiceFee
+		}
+
 		responses = append(responses, SpecialOrderResponse{
 			Folio:           so.Folio,
 			OrderID:         so.ID,
 			CustomerName:    customerName,
+			CustomerWA:      customerWa,
 			Status:          so.Status,
 			Title:           title,
 			Description:     description,
 			Deadline:        detail.Deadline,
 			AttachmentCount: attachmentCount,
+			Attachments:     attachments,
 			Phase:           detail.Phase,
 			ProgressPct:     detail.ProgressPct,
+			GastoTerceros:   gasto,
+			ServiceFee:      service,
 		})
 	}
 
@@ -126,6 +147,54 @@ func (s *Service) UpdateOrderStatus(ctx context.Context, id string, status strin
 		return fmt.Errorf("validation: %s", errs[0].Message)
 	}
 	return s.repo.UpdateStatus(ctx, id, status)
+}
+
+// UpdateOrderDetails validates the PATCH payload, derives the fiscal total
+// (IVA on service fee only) and persists the detail fields. Status and
+// completed_at are never touched. Returns the total derived from the payload.
+func (s *Service) UpdateOrderDetails(ctx context.Context, id string, req UpdateDetailsRequest) (float64, error) {
+	var progressPtr *int
+	if req.ProgressPct.Set && req.ProgressPct.Value != nil {
+		progressPtr = req.ProgressPct.Value
+	}
+	if errs := validation.ValidateDetailsRequest(req.Title, req.Phase, progressPtr, req.GastoTerceros, req.ServiceFee); len(errs) > 0 {
+		return 0, ValidationErrors(errs)
+	}
+
+	gastoCents := dollarsToCents(req.GastoTerceros)
+	serviceCents := dollarsToCents(req.ServiceFee)
+	total := float64(ComputeTotalCents(gastoCents, serviceCents)) / 100
+
+	if err := s.repo.UpdateDetails(ctx, id, req, total); err != nil {
+		return 0, err
+	}
+	return total, nil
+}
+
+// CreateSpecial validates the create payload, derives the fiscal total and
+// persists the orders row plus its details row. Returns the new id and folio.
+func (s *Service) CreateSpecial(ctx context.Context, req CreateSpecialRequest) (CreateSpecialResponse, error) {
+	if errs := validation.ValidateCreateRequest(req.CustomerName, req.Title, req.ProgressPct, req.GastoTerceros, req.ServiceFee, req.Attachments); len(errs) > 0 {
+		return CreateSpecialResponse{}, ValidationErrors(errs)
+	}
+
+	total := float64(ComputeTotalCents(dollarsToCents(req.GastoTerceros), dollarsToCents(req.ServiceFee))) / 100
+
+	id, folio, err := s.repo.CreateSpecial(ctx, req, total)
+	if err != nil {
+		return CreateSpecialResponse{}, err
+	}
+	return CreateSpecialResponse{ID: id, Folio: folio}, nil
+}
+
+// AppendAttachment links a stored URL to the order's attachments.
+func (s *Service) AppendAttachment(ctx context.Context, id string, url string) error {
+	return s.repo.AppendAttachment(ctx, id, url)
+}
+
+// RemoveAttachment unlinks a URL from the order's attachments.
+func (s *Service) RemoveAttachment(ctx context.Context, id string, url string) error {
+	return s.repo.RemoveAttachment(ctx, id, url)
 }
 
 func statusGroup(status string) int {

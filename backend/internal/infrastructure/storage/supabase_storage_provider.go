@@ -50,3 +50,9 @@ func (p *SupabaseStorageProvider) GetPublicUrl(bucket string, filename string) s
 	publicURL := p.client.Storage.GetPublicUrl(bucket, filename)
 	return publicURL.SignedURL
 }
+
+// Delete hard-deletes an object from the bucket (storage-go RemoveFile).
+func (p *SupabaseStorageProvider) Delete(ctx context.Context, bucket string, filename string) error {
+	_, err := p.client.Storage.RemoveFile(bucket, []string{filename})
+	return err
+}
