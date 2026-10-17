@@ -16,6 +16,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from '@/i18n/client';
 import { useSpecialRequests } from '@/lib/api/hooks/useSpecialRequests';
 import { updateOrderStatus } from '@/lib/api/specialRequests';
+import { useRequestDrawer } from '@/components/providers/RequestDrawerProvider';
 import { SpecialOrder } from '@/lib/api/types';
 import { BoardColumn } from './BoardColumn';
 import { RequestCard } from './RequestCard';
@@ -38,7 +39,14 @@ interface SpecialRequestsBoardProps {
 
 export function createDragEndHandler(deps: {
   requests: SpecialOrder[];
-  mutate: (fn: () => Promise<SpecialOrder[]>, opts: object) => Promise<unknown>;
+  mutate: (
+    fn: () => Promise<SpecialOrder[]>,
+    opts: {
+      optimisticData: SpecialOrder[];
+      rollbackOnError: boolean;
+      revalidate: boolean;
+    },
+  ) => Promise<unknown>;
   t: (key: string) => string;
   onClearActive: () => void;
 }) {
@@ -74,6 +82,7 @@ export function createDragEndHandler(deps: {
 export const SpecialRequestsBoard: React.FC<SpecialRequestsBoardProps> = ({ lng }) => {
   const { t } = useTranslation(lng, 'common');
   const { requests, isLoading, mutate } = useSpecialRequests();
+  const { openCreate } = useRequestDrawer();
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const sensors = useSensors(
@@ -91,7 +100,13 @@ export const SpecialRequestsBoard: React.FC<SpecialRequestsBoardProps> = ({ lng 
   }, []);
 
   const handleDragEnd = useCallback(
-    createDragEndHandler({ requests, mutate, t, onClearActive: () => setActiveId(null) }),
+    (event: DragEndEvent) =>
+      createDragEndHandler({
+        requests,
+        mutate,
+        t,
+        onClearActive: () => setActiveId(null),
+      })(event),
     [requests, mutate, t]
   );
 
@@ -113,9 +128,9 @@ export const SpecialRequestsBoard: React.FC<SpecialRequestsBoardProps> = ({ lng 
         </div>
         <button
           type="button"
+          onClick={openCreate}
+          data-testid="new-request-button"
           className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-talavera text-white text-sm font-bold shadow-ambient hover:shadow-lg transition-shadow"
-          disabled
-          title="Coming in slice 2"
         >
           <Plus size={18} />
           {t('specialRequests.newRequest')}
