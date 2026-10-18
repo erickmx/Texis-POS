@@ -1,10 +1,11 @@
 # Checkpoint: special-requests-actions (Slice 3) — HANDOFF
 
-> Status: SEED CHECKPOINT saved 2026-09-05 at the end of slice 2b. Slice 3 is NOT yet
-> authorized, scoped, or planned — this document hands off state so the next session
-> resumes cleanly under the gentle-ai 4.0.0 ODD workflow (and subagents once the
-> opencode-go quota resets). Replace/rebuild this file through ODD planning when slice 3
-> is authorized; do not treat it as an approved task list.
+> Status: SLICE 3 DEFERRED 2026-10-17. An ODD session on 2026-10-17 authorized slice 3,
+> ran the question round, and the user deferred ALL THREE actions (WhatsApp, CFDI, Print)
+> as placeholders pending dedicated research and planning. No code changes resulted: the
+> drawer already renders all three as disabled placeholders (`comingSoon`). See
+> "Slice 3 scope — DEFERRED" below for the explore findings the future session needs.
+> The follow-ups list further down remains live and is the candidate pool for next work.
 
 ## Where the project stands
 
@@ -27,29 +28,51 @@ slice-3 work-unit commits on top. Excluded from the commits deliberately: `.atl/
 `package-lock.json`/`node_modules` (tooling artifacts — the root pair previously hijacked
 Turbopack root inference; `ui/next.config.ts` pins turbopack.root since slice 1).
 
-## Slice 3 scope (candidate — needs authorization + question round)
+## Slice 3 scope — DEFERRED (question round of 2026-10-17)
 
-Make the inert `ActionsSeam` real (2a design decision 7 built it as a single replaceable
-component): **WhatsApp / CFDI / Print** actions on special orders.
+User decision, verbatim: "better lets leave just a place holder, this task will be tackled
+later with better planning and reasearch, like all the CFDI and mexican tickets
+generation". WhatsApp backend send, CFDI, and Print are ALL deferred. Answers given
+then superseded by the deferral: WhatsApp = backend send via whatsmeow; roles =
+sellers+admins + audit log (the role-guard + audit requirement still stands for whenever
+the actions return).
 
-Known anchors (verified through 2b):
-- `ui/src/components/special-requests/drawer/ActionsSeam.tsx` — three disabled buttons, i18n keys exist (`specialRequests.drawer.actions.*` + `comingSoon`).
-- `customer_wa` is exposed end-to-end since 2a (orders table → GET /special → drawer header) → WhatsApp deep-link (`https://wa.me/<phone>`) is nearly free client-side.
-- Backend already depends on `go.mau.fi/whatsmeow` (AGENTS.md) — a backend-sent message flow is possible but much larger.
-- `orders.fiscal_uuid` column exists (v1 schema, unused so far) → CFDI action has a natural anchor; real CFDI issuance likely needs an external PAC service — product decision required.
-- Print: browser print view vs PDF generation — product decision required.
+### Explore delta findings (subagent mvd2c64i-2-49db, 2026-10-17)
 
-Open product questions for the proposal round: per-action behavior (deep link vs backend
-send; CFDI issue vs view vs link; print scope), roles allowed, audit/persistence needs.
+- **whatsmeow is greenfield**: NOT in `go.mod` despite AGENTS.md listing it as a
+  dependency; zero imports in `backend/`; no session store (whatsmeow `sqlstore` needs a
+  sqlite or postgres driver; PostgREST cannot host it), no pairing flow, no bootstrap in
+  `cmd/main.go`. AGENTS.md's dependency list should be corrected when this work resumes.
+- Roles are JWT-only: `auth.RequireRole`/`IsAdmin`/`IsSeller`
+  (`backend/internal/auth/middleware.go:47-73`); handlers read `c.Locals("user_role")`;
+  no user id in claims — check what JWT `sub` holds before specing the audit "who".
+- Route anchor for a future send action: `POST /api/orders/special/:id/whatsapp` in the
+  orders group (`backend/internal/orders/handler.go:29-37`); insert pattern
+  `backend/internal/infrastructure/db/supabase_order_repo.go:195-262`.
+- Schema = flat hand-applied `backend/Supabase_Schema_vN.sql`; no audit table exists;
+  service-role key bypasses RLS server-side.
+- UI: `ActionsSeam.tsx` receives only `lng` — the order must be threaded as a prop;
+  i18n keys already exist; drawer tests `jest.mock("@/lib/api/specialRequests")`, so a
+  future `sendWhatsApp` fn slots into that mock block.
+
+### What the future planning session must answer
+
+1. whatsmeow session store: sqlite file (`modernc.org/sqlite`, pure Go) vs direct
+   Postgres connection to Supabase for the device store.
+2. Pairing: CLI QR at setup vs admin-UI QR page vs pair-code by phone number.
+3. Message template: fixed vs template + seller note vs fully custom.
+4. CFDI: PAC selection and Mexican ticket-generation requirements.
 
 ## Follow-ups to fold in or track separately (from #150/#151/#152)
 
-1. W5/W2: live smoke test vs dev backend — attachment lifecycle roundtrip + seller-JWT create + delete idempotency on a real absent object (also validates 2a W1: PATCH/GET special).
-2. W1: create-mode X/Escape close assertion (~6 lines, `RequestDrawer.test.tsx`).
-3. W3: production `yarn build` never run for 2a/2b.
-4. Lint debt: 8 pre-existing errors in untouched files (login page/test ×3, Navbar set-state-in-effect, ImageDropZone, ProductForm.test, i18n client/server ×2).
-5. RLS UPDATE/DELETE policies on orders + special_requests_details (defense-in-depth; service-role bypasses) — open since slice 1.
+1. W5/W2: live smoke test vs dev backend — attachment lifecycle roundtrip + seller-JWT create + delete idempotency on a real absent object (also validates 2a W1: PATCH/GET special). STILL OPEN — needs a live dev backend.
+2. DONE 2026-10-17 — W1: create-mode X/Escape close assertion added (`RequestDrawer.test.tsx`, "closes create mode on X and Escape."); jest 124/124.
+3. DONE 2026-10-17 — W3: production `yarn build` green (exit 0, all routes prerendered).
+4. DONE 2026-10-17 — lint debt cleared: 8 errors → 0 (login page/test, Navbar set-state-in-effect, ImageDropZone memoization, ProductForm.test, i18n client/server); tsc clean; three unused-catch-binding warnings removed as a side effect. Navbar keeps a scoped eslint-disable with justification (mount-time auth read is the hydration-safe pattern).
+5. DONE 2026-10-17 — RLS posture DECIDED (user): mutations stay backend-only. `backend/Supabase_Schema_v4.sql` documents the decision, adds no policies, and idempotently re-asserts ENABLE RLS on orders + special_requests_details. Hand-applying to the live DB is user-owned.
 6. CLOSED in 2b (do not redo): orders auth middleware gap; storage `file`/`image` field bug; png rejection bug.
+
+Commit evidence (2026-10-17 session): `56a83c0` test(ui) W1 · `2e77cb4` fix(ui) lint debt · the RLS posture + this ledger ride in the same docs commit as `Supabase_Schema_v4.sql`.
 
 ## Environment facts for the next session
 
@@ -84,5 +107,8 @@ send; CFDI issue vs view vs link; print scope), roles allowed, audit/persistence
 1. `mem_context` → `mem_search "special-requests checkpoint"` → this checkpoint + #153.
 2. Read this file (`odd/tasks/special-requests-actions.md`).
 3. Confirm the branch was pushed/reviewed; slice-3 work-unit commits stack on top.
-4. Probe subagent quota with one cheap delegation; fall back inline if blocked.
-5. Run the new ODD flow for slice 3: authorize → explore (delta over #142; anchors above) → question round (product decisions above) → plan (`odd/tasks/` per new contract) → implement per task with work-unit commits → review via `gentle_review` RDD lifecycle on committed candidates → close.
+4. Subagent quota CONFIRMED RESET 2026-10-17 (gentle-ai-explore probe returned ok);
+   roster usable: gentle-ai-explore/worker/verify + review-* + jd-*.
+5. Slice 3 is DEFERRED — do not plan or implement it without the research answers in
+   "What the future planning session must answer". Next work = the follow-ups list below,
+   or revive the deferred scope once whatsmeow/CFDI research exists.
