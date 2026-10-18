@@ -211,6 +211,20 @@ describe("RequestDrawer", () => {
     expect(screen.queryByTestId("fiscal-card")).not.toBeInTheDocument();
   });
 
+  it("closes create mode on X and Escape.", () => {
+    renderDrawer(<CreateProbe />);
+    fireEvent.click(screen.getByText("create-probe"));
+    expect(screen.getByTestId("request-drawer")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("drawer-close"));
+    expect(screen.queryByTestId("request-drawer")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("create-probe"));
+    expect(screen.getByTestId("request-drawer")).toBeInTheDocument();
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.queryByTestId("request-drawer")).not.toBeInTheDocument();
+  });
+
   it("rejects progress_pct 101 in edit mode and never calls the API.", async () => {
     const drawer = openDrawer();
     fireEvent.click(within(drawer).getByTestId("drawer-edit"));
