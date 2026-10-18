@@ -24,7 +24,7 @@ if (initReactI18next) {
     });
 }
 
-export function useTranslation(lng: string, ns = 'common', options: any = {}) {
+export function useTranslation(lng: string, ns = 'common', options: Parameters<typeof useTranslationOrg>[1] = {}) {
   const ret = useTranslationOrg(ns, options);
   const { i18n } = ret;
   if (runsOnServerSide && lng && i18n?.resolvedLanguage !== lng) {

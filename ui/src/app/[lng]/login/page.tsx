@@ -11,6 +11,13 @@ import { User, Lock, Eye, EyeOff, ShieldAlert } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 
+// Cookie write lives at module scope: the React compiler's immutability rule
+// forbids assigning document.cookie inside the component body.
+function setAuthCookie(token: string) {
+  const secure = window.location.protocol === 'https:';
+  document.cookie = `user_token=${token}; max-age=86400; path=/; samesite=lax${secure ? '; secure' : ''}`;
+}
+
 interface LoginPageProps {
   params: Promise<{ lng: string }>;
 }
@@ -47,9 +54,13 @@ function LoginForm({ params }: LoginPageProps) {
     if (errorType === 'expired') {
       toast.error(t('auth.error_session_expired'), { id: 'session-expired' });
       // Clean up search params without reloading
-      const url = new URL(window.location.href);
-      url.searchParams.delete('auth_error');
-      window.history.replaceState({}, '', url.toString());
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('auth_error');
+        window.history.replaceState({}, '', url.toString());
+      } catch {
+        // Non-critical cleanup: a malformed URL only skips the param cleanup.
+      }
     }
   }, [searchParams, t]);
 
@@ -75,7 +86,7 @@ function LoginForm({ params }: LoginPageProps) {
             router.replace(`/${lng}/inventory`);
           }
         }
-      } catch (e) {
+      } catch {
         // Invalid token format
       }
     }
@@ -144,15 +155,14 @@ function LoginForm({ params }: LoginPageProps) {
       }
 
       // Successful Auth: Save Token to Cookie (lifetime: 24h) and localStorage
-      const secure = window.location.protocol === 'https:';
-      document.cookie = `user_token=${result.token}; max-age=86400; path=/; samesite=lax${secure ? '; secure' : ''}`;
+      setAuthCookie(result.token);
       localStorage.setItem('user_token', result.token);
       toast.success(t('auth.submit_button') + ' ' + t('inventory.success_edit').replace(/.*success.*/i, ''));
       
       // Redirect to Inventory dashboard
       router.push(`/${lng}/inventory`);
       router.refresh();
-    } catch (err) {
+    } catch {
       setAuthError(t('inventory.error_generic'));
       toast.error(t('inventory.error_generic'));
     }

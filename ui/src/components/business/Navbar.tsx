@@ -30,6 +30,10 @@ export const Navbar: React.FC<NavbarProps> = ({ lng }) => {
   const [userRole, setUserRole] = useState<string>('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  // Mount-time auth read: browser storage is only readable after mount, and the
+  // server-rendered HTML must match the first client render (unauthenticated),
+  // so setting state in this mount effect is the intended hydration-safe pattern.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     let token = getCookie('user_token');
     if (!token && typeof window !== 'undefined') {
@@ -44,11 +48,14 @@ export const Navbar: React.FC<NavbarProps> = ({ lng }) => {
           setUserRole(payload.role || '');
           return;
         }
-      } catch (e) {}
+      } catch {
+        // Malformed token: fall through to the unauthenticated state below.
+      }
     }
     setIsAuthenticated(false);
     setUserRole('');
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleAvatarClick = () => {
     if (isAuthenticated) {

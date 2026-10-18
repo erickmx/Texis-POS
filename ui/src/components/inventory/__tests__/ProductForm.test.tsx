@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ProductForm } from '../ProductForm';
-import { InventoryModalProvider } from '../../providers/InventoryModalProvider';
+import { InventoryModalProvider, type ModalProduct } from '../../providers/InventoryModalProvider';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -47,7 +47,7 @@ jest.mock('swr', () => ({
 const mockCancel = jest.fn();
 const mockSuccess = jest.fn();
 
-const renderForm = (props?: { mode?: 'create' | 'edit'; initialData?: any }) => {
+const renderForm = (props?: { mode?: 'create' | 'edit'; initialData?: ModalProduct }) => {
   return render(
     <InventoryModalProvider>
       <ProductForm
@@ -90,7 +90,7 @@ describe('ProductForm', () => {
         buyPrice: 50,
         salePrice: 75,
         stockLevel: 10,
-        image: null,
+        image: undefined,
         isDeleted: false,
         createdAt: '2024-01-01T00:00:00Z',
       },

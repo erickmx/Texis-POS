@@ -33,15 +33,18 @@ export const ImageDropZone: React.FC<ImageDropZoneProps> = ({
     data: { type: 'image' },
   });
 
-  const validateFile = (file: File): string | null => {
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      return t('inventory.modal.errors.image_type');
-    }
-    if (file.size > MAX_SIZE_BYTES) {
-      return t('inventory.modal.errors.image_size');
-    }
-    return null;
-  };
+  const validateFile = useCallback(
+    (file: File): string | null => {
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        return t('inventory.modal.errors.image_type');
+      }
+      if (file.size > MAX_SIZE_BYTES) {
+        return t('inventory.modal.errors.image_size');
+      }
+      return null;
+    },
+    [t]
+  );
 
   const handleFile = useCallback(
     (file: File) => {
@@ -53,7 +56,7 @@ export const ImageDropZone: React.FC<ImageDropZoneProps> = ({
       setLocalError(null);
       onChange(file);
     },
-    [onChange, t]
+    [onChange, validateFile]
   );
 
   const handleDrop = useCallback(
