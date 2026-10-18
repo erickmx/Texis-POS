@@ -1,10 +1,12 @@
-import React from 'react';
-import { Sidebar } from '@/components/business/Sidebar';
-import { Navbar } from '@/components/business/Navbar';
-import { InventoryModalProvider } from '@/components/providers/InventoryModalProvider';
-import { SWRProvider } from '@/components/providers/SWRProvider';
-import { ProductModal } from '@/components/inventory/ProductModal';
-import { AuthGuard } from '@/components/providers/AuthGuard';
+import React from "react";
+import { Sidebar } from "@/components/business/Sidebar";
+import { Navbar } from "@/components/business/Navbar";
+import { InventoryModalProvider } from "@/components/providers/InventoryModalProvider";
+import { RequestDrawerProvider } from "@/components/providers/RequestDrawerProvider";
+import { RequestDrawer } from "@/components/special-requests/RequestDrawer";
+import { SWRProvider } from "@/components/providers/SWRProvider";
+import { ProductModal } from "@/components/inventory/ProductModal";
+import { AuthGuard } from "@/components/providers/AuthGuard";
 
 export default async function BusinessLayout({
   children,
@@ -18,16 +20,19 @@ export default async function BusinessLayout({
     <AuthGuard>
       <SWRProvider>
         <InventoryModalProvider>
-          <div className="flex h-screen bg-background overflow-hidden">
-            <Sidebar lng={lng} />
-            <div className="flex-1 flex flex-col min-w-0">
-              <Navbar lng={lng} />
-              <main className="flex-1 overflow-y-auto bg-background">
-                {children}
-              </main>
+          <RequestDrawerProvider>
+            <div className="flex h-screen bg-background overflow-hidden">
+              <Sidebar lng={lng} />
+              <div className="flex-1 flex flex-col min-w-0">
+                <Navbar lng={lng} />
+                <main className="flex-1 overflow-y-auto bg-background">
+                  {children}
+                </main>
+              </div>
             </div>
-          </div>
-          <ProductModal lng={lng} />
+            <ProductModal lng={lng} />
+            <RequestDrawer lng={lng} />
+          </RequestDrawerProvider>
         </InventoryModalProvider>
       </SWRProvider>
     </AuthGuard>

@@ -57,7 +57,7 @@ func main() {
 
 	// Rate Limiter: 100 requests per 60 seconds
 	app.Use(limiter.New(limiter.Config{
-		Max: 100,
+		Max:        100,
 		Expiration: 60 * time.Second,
 	}))
 
@@ -91,7 +91,7 @@ func main() {
 	storageHandler := storage.NewHandler(storageSvc, authSvc)
 	inventoryHandler := inventory.NewHandler(inventorySvc, authSvc)
 	categoryHandler := category.NewHandler(categorySvc, authSvc)
-	orderHandler := orders.NewHandler(orderSvc)
+	orderHandler := orders.NewHandler(orderSvc, authSvc, storageSvc)
 
 	// 7. Register Routes
 	app.Post("/api/login", authHandler.Login)

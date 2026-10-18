@@ -6,6 +6,7 @@
     "stock_levels": "Niveles de Stock",
     "analytics": "Análisis",
     "history": "Historial",
+    "special_requests": "Pedidos Especiales",
     "help": "Ayuda",
     "logout": "Cerrar Sesión"
   },
@@ -105,6 +106,131 @@
       "email_required": "El usuario o correo electrónico es obligatorio",
       "invalid_email": "Por favor ingrese un correo electrónico válido",
       "password_required": "La contraseña es obligatoria"
+    }
+  },
+  "specialRequests": {
+    "title": "Pedidos Especiales",
+    "newRequest": "Nuevo Pedido",
+    "columns": {
+      "pending": "Pendiente",
+      "in_progress": "En Progreso",
+      "done": "Completado"
+    },
+    "urgency": {
+      "overdue": "VENCIDO",
+      "urgent": "Urgente",
+      "warning": "Próximo",
+      "normal": "Normal"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "in_progress": "En Progreso",
+      "done": "Completado"
+    },
+    "active": "ACTIVO",
+    "attachments": "{{count}} adjunto(s)",
+    "empty": {
+      "board": "No hay pedidos especiales",
+      "column": "Sin pedidos"
+    },
+    "error": {
+      "moveFailed": "Error al mover el pedido"
+    },
+    "drawer": {
+      "header": {
+        "title": "Pedido especial"
+      },
+      "fields": {
+        "title": "Título",
+        "description": "Descripción",
+        "deadline": "Fecha límite",
+        "deadlineNone": "Sin fecha límite",
+        "phase": "Fase",
+        "progressPct": "Progreso (%)",
+        "gastoTerceros": "Gasto a terceros",
+        "serviceFee": "Honorarios"
+      },
+      "fiscal": {
+        "title": "Detalles fiscales",
+        "gastoTerceros": "Gasto a terceros",
+        "serviceFee": "Honorarios",
+        "subtotal": "Subtotal",
+        "iva": "IVA (16%)",
+        "ivaOnService": "sobre honorarios únicamente",
+        "total": "Total"
+      },
+      "attachments": {
+        "title": "Adjuntos",
+        "empty": "Sin adjuntos",
+        "add": "Agregar",
+        "confirmDelete": "¿Eliminar? Clic para confirmar",
+        "deleting": "Eliminando…",
+        "deleteFailed": "Error al eliminar el adjunto"
+      },
+      "actions": {
+        "whatsapp": "WhatsApp",
+        "cfdi": "CFDI",
+        "print": "Imprimir",
+        "comingSoon": "Disponible próximamente"
+      },
+      "buttons": {
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "edit": "Editar",
+        "close": "Cerrar"
+      },
+      "success": {
+        "saved": "Cambios guardados"
+      },
+      "errors": {
+        "title_max": "El título debe tener 200 caracteres o menos",
+        "progress_range": "El progreso debe estar entre 0 y 100",
+        "fiscal_nonnegative": "El valor no puede ser negativo",
+        "deadline_invalid": "Fecha límite inválida"
+      },
+      "loadError": "Error al guardar los cambios"
+    },
+    "newRequestForm": {
+      "title": "Nuevo pedido especial",
+      "fields": {
+        "customerName": "Nombre del cliente",
+        "customerWa": "WhatsApp del cliente",
+        "title": "Título",
+        "description": "Descripción",
+        "deadline": "Fecha límite",
+        "phase": "Fase",
+        "progressPct": "Progreso (%)",
+        "gastoTerceros": "Gasto a terceros",
+        "serviceFee": "Honorarios"
+      },
+      "fiscal": {
+        "subtotal": "Subtotal",
+        "iva": "IVA (16%)",
+        "total": "Total"
+      },
+      "attachments": {
+        "title": "Adjuntos",
+        "add": "Agregar archivos",
+        "uploading": "Subiendo…",
+        "failed": "Error al subir el archivo"
+      },
+      "buttons": {
+        "create": "Crear pedido",
+        "cancel": "Cancelar"
+      },
+      "success": {
+        "created": "Pedido creado"
+      },
+      "errors": {
+        "customer_required": "El nombre del cliente es obligatorio",
+        "customer_max": "El nombre debe tener 120 caracteres o menos",
+        "title_max": "El título debe tener 200 caracteres o menos",
+        "progress_range": "El progreso debe estar entre 0 y 100",
+        "fiscal_nonnegative": "El valor no puede ser negativo",
+        "deadline_invalid": "Fecha límite inválida",
+        "upload_failed": "Error al subir los archivos",
+        "create_failed": "Error al crear el pedido"
+      }
     }
   }
 }

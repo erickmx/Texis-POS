@@ -20,14 +20,14 @@ func NewHandler(service *Service, authService auth.AuthService) *Handler {
 func (h *Handler) RegisterRoutes(app *fiber.App) {
 	api := app.Group("/api/storage")
 
-	// Only admin can upload for now
-	api.Post("/upload", auth.IsAdmin(h.authService), h.Upload)
+	// Any authenticated role may upload (admin or seller).
+	api.Post("/upload", auth.IsAuthenticated(h.authService), h.Upload)
 }
 
 func (h *Handler) Upload(c fiber.Ctx) error {
-	file, err := c.FormFile("image")
+	file, err := c.FormFile("file")
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "no image provided"})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "no file provided"})
 	}
 
 	f, err := file.Open()

@@ -5,7 +5,7 @@ import LoginPage from '../page';
 // Mock useTranslation for client components
 jest.mock('@/i18n/client', () => ({
   useTranslation: () => ({
-    t: (key: string, options?: any) => {
+    t: (key: string, options?: Record<string, unknown>) => {
       if (key === 'auth.login_title') return 'Iniciar Sesión';
       if (key === 'auth.email_label') return 'Usuario o Correo Electrónico';
       if (key === 'auth.password_label') return 'Contraseña';
@@ -22,7 +22,7 @@ jest.mock('@/i18n/client', () => ({
 // Mock next/navigation
 const mockPush = jest.fn();
 const mockRefresh = jest.fn();
-let mockSearchParamsGet = jest.fn().mockReturnValue(null);
+const mockSearchParamsGet = jest.fn().mockReturnValue(null);
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
