@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"errors"
 	"io"
 	"strings"
 	"testing"
@@ -28,6 +29,11 @@ func (m *MockProvider) Exists(ctx context.Context, bucket, filename string) (boo
 func (m *MockProvider) GetPublicUrl(bucket, filename string) string {
 	args := m.Called(bucket, filename)
 	return args.String(0)
+}
+
+func (m *MockProvider) Delete(ctx context.Context, bucket, filename string) error {
+	args := m.Called(ctx, bucket, filename)
+	return args.Error(0)
 }
 
 // Fixed import error by adding missing io import and using it correctly
@@ -86,5 +92,37 @@ func TestStorageService_Exists(t *testing.T) {
 		assert.NoError(t, err)
 		assert.False(t, exists)
 		mockProvider.AssertExpectations(t)
+	})
+}
+
+func TestStorageService_Upload_PngAllowed(t *testing.T) {
+	ctx := context.Background()
+	mockProvider := new(MockProvider)
+	service := NewService(mockProvider)
+	reader := strings.NewReader("png-data")
+	mockProvider.On("Upload", ctx, InventoryBucket, mock.AnythingOfType("string"), reader).Return("http://public-url.com/img.png", nil)
+
+	url, err := service.Upload(ctx, reader, "photo.png", 100)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, url)
+	mockProvider.AssertExpectations(t)
+}
+
+func TestStorageService_Delete(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("delegates to provider", func(t *testing.T) {
+		mockProvider := new(MockProvider)
+		service := NewService(mockProvider)
+		mockProvider.On("Delete", ctx, InventoryBucket, "obj.png").Return(nil)
+		assert.NoError(t, service.Delete(ctx, "obj.png"))
+		mockProvider.AssertExpectations(t)
+	})
+
+	t.Run("propagates error", func(t *testing.T) {
+		mockProvider := new(MockProvider)
+		service := NewService(mockProvider)
+		mockProvider.On("Delete", ctx, InventoryBucket, "obj.png").Return(errors.New("boom"))
+		assert.Error(t, service.Delete(ctx, "obj.png"))
 	})
 }

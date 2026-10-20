@@ -6,6 +6,7 @@
     "stock_levels": "Stock Levels",
     "analytics": "Analytics",
     "history": "History",
+    "special_requests": "Special Requests",
     "help": "Help",
     "logout": "Logout"
   },
@@ -105,6 +106,131 @@
       "email_required": "Username or email is required",
       "invalid_email": "Please enter a valid email address",
       "password_required": "Password is required"
+    }
+  },
+  "specialRequests": {
+    "title": "Special Requests",
+    "newRequest": "New Request",
+    "columns": {
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "done": "Done"
+    },
+    "urgency": {
+      "overdue": "OVERDUE",
+      "urgent": "Urgent",
+      "warning": "Upcoming",
+      "normal": "Normal"
+    },
+    "status": {
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "done": "Done"
+    },
+    "active": "ACTIVE",
+    "attachments": "{{count}} attachment(s)",
+    "empty": {
+      "board": "No special requests",
+      "column": "No orders"
+    },
+    "error": {
+      "moveFailed": "Failed to move the order"
+    },
+    "drawer": {
+      "header": {
+        "title": "Special request"
+      },
+      "fields": {
+        "title": "Title",
+        "description": "Description",
+        "deadline": "Deadline",
+        "deadlineNone": "No deadline",
+        "phase": "Phase",
+        "progressPct": "Progress (%)",
+        "gastoTerceros": "Third-party expenses",
+        "serviceFee": "Service fee"
+      },
+      "fiscal": {
+        "title": "Fiscal details",
+        "gastoTerceros": "Third-party expenses",
+        "serviceFee": "Service fee",
+        "subtotal": "Subtotal",
+        "iva": "VAT (16%)",
+        "ivaOnService": "on service fee only",
+        "total": "Total"
+      },
+      "attachments": {
+        "title": "Attachments",
+        "empty": "No attachments",
+        "add": "Add",
+        "confirmDelete": "Delete? Click to confirm",
+        "deleting": "Deleting…",
+        "deleteFailed": "Failed to delete the attachment"
+      },
+      "actions": {
+        "whatsapp": "WhatsApp",
+        "cfdi": "CFDI",
+        "print": "Print",
+        "comingSoon": "Coming soon"
+      },
+      "buttons": {
+        "save": "Save",
+        "cancel": "Cancel",
+        "edit": "Edit",
+        "close": "Close"
+      },
+      "success": {
+        "saved": "Changes saved"
+      },
+      "errors": {
+        "title_max": "Title must be 200 characters or fewer",
+        "progress_range": "Progress must be between 0 and 100",
+        "fiscal_nonnegative": "Value cannot be negative",
+        "deadline_invalid": "Invalid deadline"
+      },
+      "loadError": "Failed to save changes"
+    },
+    "newRequestForm": {
+      "title": "New special request",
+      "fields": {
+        "customerName": "Customer name",
+        "customerWa": "Customer WhatsApp",
+        "title": "Title",
+        "description": "Description",
+        "deadline": "Deadline",
+        "phase": "Phase",
+        "progressPct": "Progress (%)",
+        "gastoTerceros": "Third-party expenses",
+        "serviceFee": "Service fee"
+      },
+      "fiscal": {
+        "subtotal": "Subtotal",
+        "iva": "VAT (16%)",
+        "total": "Total"
+      },
+      "attachments": {
+        "title": "Attachments",
+        "add": "Add files",
+        "uploading": "Uploading…",
+        "failed": "File upload failed"
+      },
+      "buttons": {
+        "create": "Create request",
+        "cancel": "Cancel"
+      },
+      "success": {
+        "created": "Request created"
+      },
+      "errors": {
+        "customer_required": "Customer name is required",
+        "customer_max": "Customer name must be 120 characters or fewer",
+        "title_max": "Title must be 200 characters or fewer",
+        "progress_range": "Progress must be between 0 and 100",
+        "fiscal_nonnegative": "Value cannot be negative",
+        "deadline_invalid": "Invalid deadline",
+        "upload_failed": "File upload failed",
+        "create_failed": "Failed to create the request"
+      }
     }
   }
 }

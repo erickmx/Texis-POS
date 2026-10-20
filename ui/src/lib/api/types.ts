@@ -60,7 +60,7 @@ export interface CreateProductDTO {
   categoryIds?: string[];
 }
 
-export interface UpdateProductDTO extends Partial<CreateProductDTO> {}
+export type UpdateProductDTO = Partial<CreateProductDTO>;
 
 export interface PaginationMeta {
   page: number;
@@ -100,9 +100,11 @@ export function mapProduct(r: ProductResponse): Product {
   };
 }
 
-export function mapProductToDTO(p: CreateProductDTO | UpdateProductDTO): Record<string, unknown> {
+export function mapProductToDTO(
+  p: CreateProductDTO | UpdateProductDTO,
+): Record<string, unknown> {
   const dto: Record<string, unknown> = {};
-  if ('name' in p && p.name !== undefined) dto.title = p.name;
+  if ("name" in p && p.name !== undefined) dto.title = p.name;
   if (p.description !== undefined) dto.description = p.description;
   if (p.sku !== undefined) dto.sku = p.sku;
   if (p.satCode !== undefined) dto.clave_sat = p.satCode;
@@ -122,5 +124,60 @@ export function mapCategory(r: CategoryResponse): Category {
     name: r.name,
     description: r.description,
     createdAt: r.created_at,
+  };
+}
+
+// --- Special Requests ---
+
+export interface SpecialOrderResponse {
+  folio: number;
+  orderId: string;
+  customerName: string;
+  customerWa: string;
+  status: string;
+  title: string;
+  description: string;
+  deadline: string | null;
+  attachmentCount: number;
+  attachments: string[];
+  phase: string | null;
+  progressPct: number | null;
+  gastoTerceros: number;
+  serviceFee: number;
+}
+
+export interface SpecialOrder {
+  folio: number;
+  orderId: string;
+  customerName: string;
+  customerWa: string;
+  status: "pending" | "in_progress" | "done";
+  title: string;
+  description: string;
+  deadline: string | null;
+  attachmentCount: number;
+  attachments: string[];
+  phase: string | null;
+  progressPct: number | null;
+  gastoTerceros: number;
+  serviceFee: number;
+}
+
+export function mapSpecialOrder(r: SpecialOrderResponse): SpecialOrder {
+  return {
+    folio: r.folio,
+    orderId: r.orderId,
+    customerName: r.customerName ?? "",
+    customerWa: r.customerWa ?? "",
+    status: r.status as SpecialOrder["status"],
+    title: r.title ?? "",
+    description: r.description ?? "",
+    deadline: r.deadline ?? null,
+    attachmentCount: r.attachmentCount ?? 0,
+    attachments: r.attachments ?? [],
+    phase: r.phase ?? null,
+    progressPct: r.progressPct ?? null,
+    gastoTerceros: r.gastoTerceros ?? 0,
+    serviceFee: r.serviceFee ?? 0,
   };
 }

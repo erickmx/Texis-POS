@@ -14,6 +14,9 @@ type FieldError struct {
 var AllowedOrderStatuses = []string{"pending"}
 var AllowedOrderSortColumns = []string{"created_at", "folio", "total_amount"}
 
+// AllowedSpecialRequestStatuses are the valid workflow statuses for special requests.
+var AllowedSpecialRequestStatuses = []string{"pending", "in_progress", "done"}
+
 type OrderFilter struct {
 	Page      int
 	Limit     int
@@ -85,4 +88,18 @@ func isInSlice(val string, allowed []string) bool {
 		}
 	}
 	return false
+}
+
+// ValidateStatus validates that a status is one of the allowed special request statuses.
+func ValidateStatus(status string) []FieldError {
+	if status == "" {
+		return []FieldError{{Field: "status", Message: "status is required"}}
+	}
+	if !isInSlice(status, AllowedSpecialRequestStatuses) {
+		return []FieldError{{
+			Field:   "status",
+			Message: fmt.Sprintf("invalid status: %s. Allowed: %s", status, strings.Join(AllowedSpecialRequestStatuses, ", ")),
+		}}
+	}
+	return nil
 }
